@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boubane — Votre IA locale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- Mobile menu button -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">B</div>
+      <div class="brand-text">boubane<span>.</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Tableau de bord</div>
+      <button class="nav-item active" data-page="dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Vue d'ensemble
+      </button>
+
+      <div class="nav-section-title">Outils</div>
+      <button class="nav-item" data-page="files">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Fichiers
+        <span class="badge" id="file-count">0</span>
+      </button>
+      <button class="nav-item" data-page="web">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Navigation web
+      </button>
+      <button class="nav-item" data-page="emails">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+        Emails
+        <span class="badge" id="email-count">0</span>
+      </button>
+
+      <div class="nav-section-title">Système</div>
+      <button class="nav-item" data-page="activity">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Activité
+      </button>
+      <button class="nav-item" data-page="settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configuration
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <div class="status-dot"></div>
+        Agent en ligne
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD PAGE ─── -->
+    <section class="page-section active" id="page-dashboard">
+      <div class="page-header fade-in">
+        <h1>Bonjour 👋</h1>
+        <p class="subtitle">Votre agent IA local est prêt. Que voulez-vous faire ?</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card fade-in delay-1">
+          <div class="stat-value" id="stat-files">0</div>
+          <div class="stat-label">Fichiers analysés</div>
+        </div>
+        <div class="stat-card fade-in delay-2">
+          <div class="stat-value" id="stat-web">0</div>
+          <div class="stat-label">Pages visitées</div>
+        </div>
+        <div class="stat-card fade-in delay-3">
+          <div class="stat-value" id="stat-emails">0</div>
+          <div class="stat-label">Emails reçus</div>
+        </div>
+        <div class="stat-card fade-in delay-4">
+          <div class="stat-value" id="stat-unread">0</div>
+          <div class="stat-label">Non lus</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Activité récente</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('activity')">Voir tout</button>
+          </div>
+          <div class="activity-feed" id="dashboard-activity">
+            <div class="empty-state">
+              <p>Aucune activité pour le moment</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Fichiers récents</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('files')">Voir tout</button>
+          </div>
+          <div class="file-list" id="dashboard-files">
+            <div class="empty-state">
+              <p>Aucun fichier analysé</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── FILES PAGE ─── -->
+    <section class="page-section" id="page-files">
+      <div class="page-header fade-in">
+        <h1>Fichiers</h1>
+        <p class="subtitle">Uploadez vos documents pour analyse — PDF, Word, Excel, images</p>
+      </div>
+
+      <div class="card fade-in delay-1" style="margin-bottom: 1.5rem;">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div class="upload-text">Déposez vos fichiers ici</div>
+          <div class="upload-hint">ou cliquez pour parcourir — PDF, DOCX, XLSX, CSV, images</div>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
+      </div>
+
+      <div class="card fade-in delay-2">
+        <div class="card-header">
+          <div class="card-title">Fichiers analysés</div>
+        </div>
+        <div class="file-list" id="file-list">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Aucun fichier</h3>
+            <p>Uploadez un document pour commencer</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── WEB PAGE ─── -->
+    <section class="page-section" id="page-web">
+      <div class="page-header fade-in">
+        <h1>Navigation web</h1>
+        <p class="subtitle">Boubane navigue pour vous et extrait les informations clés</p>
+      </div>
+
+      <div class="card fade-in delay-1" style="margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label class="form-label">URL à visiter</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="url" class="form-input" id="web-url" placeholder="https://exemple.com" style="flex:1;">
+            <select class="form-input" id="web-task-type" style="width:160px;">
+              <option value="scrape">Extraire contenu</option>
+              <option value="summarize">Résumer</option>
+              <option value="extract_links">Extraire liens</option>
+            </select>
+            <button class="btn btn-primary" onclick="browseWeb()">Visiter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Résultat</div>
+          </div>
+          <div class="web-result" id="web-result">
+            Entrez une URL ci-dessus pour commencer
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Historique</div>
+          </div>
+          <div class="activity-feed" id="web-history">
+            <div class="empty-state">
+              <p>Aucune page visitée</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMAILS PAGE ─── -->
+    <section class="page-section" id="page-emails">
+      <div class="page-header fade-in">
+        <h1>Emails</h1>
+        <p class="subtitle">Gérez vos emails — tri automatique, réponses suggérées</p>
+      </div>
+
+      <div class="card fade-in delay-1" style="margin-bottom: 1.5rem;">
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button class="btn btn-primary" onclick="fetchEmails()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Récupérer emails
+          </button>
+          <button class="btn btn-ghost" onclick="showEmailConfig()">Configurer boîte mail</button>
+        </div>
+      </div>
+
+      <div class="card fade-in delay-2">
+        <div class="card-header">
+          <div class="card-title">Boîte de réception</div>
+        </div>
+        <div id="email-list">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+            </div>
+            <h3>Aucun email</h3>
+            <p>Configurez votre boîte mail puis récupérez vos emails</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ACTIVITY PAGE ─── -->
+    <section class="page-section" id="page-activity">
+      <div class="page-header fade-in">
+        <h1>Activité</h1>
+        <p class="subtitle">Historique complet des actions de votre agent</p>
+      </div>
+
+      <div class="card fade-in delay-1">
+        <div class="card-header">
+          <div class="card-title">Journal d'activité</div>
+        </div>
+        <div class="activity-feed" id="full-activity-log">
+          <div class="empty-state">
+            <p>Aucune activité enregistrée</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SETTINGS PAGE ─── -->
+    <section class="page-section" id="page-settings">
+      <div class="page-header fade-in">
+        <h1>Configuration</h1>
+        <p class="subtitle">Paramètres de votre agent Boubane</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-1">
+          <div class="card-header">
+            <div class="card-title">Boîte mail</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Serveur IMAP</label>
+            <input type="text" class="form-input" id="cfg-imap-host" placeholder="imap.gmail.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Utilisateur</label>
+            <input type="email" class="form-input" id="cfg-imap-user" placeholder="votre@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" class="form-input" id="cfg-imap-pass" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Serveur SMTP</label>
+            <input type="text" class="form-input" id="cfg-smtp-host" placeholder="smtp.gmail.com">
+          </div>
+          <button class="btn btn-primary" onclick="saveEmailConfig()">Sauvegarder</button>
+        </div>
+
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Agent</div>
+          </div>
+          <div id="agent-status">
+            <p style="color:var(--text-muted);">Chargement...</p>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
+          <div style="font-size:0.85rem;color:var(--text-muted);">
+            <p><strong>Version :</strong> 1.0.0</p>
+            <p><strong>Fonctionnalités :</strong></p>
+            <ul style="margin-left:1.25rem;margin-top:0.25rem;">
+              <li>Analyse de fichiers (PDF, DOCX, XLSX, images)</li>
+              <li>Navigation web autonome</li>
+              <li>Gestion email (IMAP/SMTP)</li>
+              <li>Dashboard temps réel</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══ EMAIL DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-email-subject">Email</h3>
+      <button class="modal-close" onclick="closeEmailModal()">✕</button>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <div style="font-weight:600;" id="modal-email-from"></div>
+      <div style="font-size:0.8rem;color:var(--text-muted);" id="modal-email-date"></div>
+    </div>
+    <div id="modal-email-body" style="font-size:0.9rem;line-height:1.6;color:var(--text);margin-bottom:1.5rem;"></div>
+    <div id="modal-email-ai" style="background:var(--cream);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;display:none;">
+      <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.5rem;">💡 Réponse suggérée</div>
+      <div id="modal-email-ai-text" style="font-size:0.88rem;color:var(--text-muted);"></div>
+    </div>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn btn-primary" onclick="generateAiResponse()">💡 Suggérer réponse</button>
+      <button class="btn btn-ghost" onclick="closeEmailModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
