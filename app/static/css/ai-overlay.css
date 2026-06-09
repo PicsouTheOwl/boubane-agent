@@ -1,0 +1,290 @@
+/* ═══════════════════════════════════════════
+   BOUBANE AI OVERLAY — Surcouche IA
+   S'appuie sur les variables CSS existantes de style.css
+   ═══════════════════════════════════════════ */
+
+/* ─── AI Suggestions Bar ─── */
+.ai-suggestions-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--warm-white), var(--cream-dark));
+  border-bottom: 1px solid var(--border-light);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ai-suggestions-bar::-webkit-scrollbar { display: none; }
+
+.ai-suggestion-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--earth-dark);
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(44, 40, 36, 0.04);
+}
+.ai-suggestion-chip:hover {
+  background: var(--earth);
+  color: var(--warm-white);
+  border-color: var(--earth);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.25);
+  transform: translateY(-1px);
+}
+.ai-suggestion-chip .chip-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+}
+
+/* ─── Animated Counters ─── */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--earth), var(--sage), var(--terracotta));
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+.stat-card:hover::after { opacity: 1; }
+
+.stat-value {
+  transition: transform 0.3s var(--ease-bounce);
+}
+.stat-card:hover .stat-value {
+  transform: scale(1.05);
+}
+
+/* Counter animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stat-value.animate {
+  animation: countUp 0.6s var(--ease-bounce) forwards;
+}
+
+/* ─── Live Activity Feed ─── */
+.ai-activity-feed {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  max-height: 400px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(100% + 20px));
+  transition: transform 0.4s var(--ease-bounce);
+}
+.ai-activity-feed.open {
+  transform: translateY(0);
+}
+
+.ai-activity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--earth), var(--earth-dark));
+  color: var(--warm-white);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.ai-activity-header .ai-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--sage-light);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ai-activity-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.ai-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  transition: background 0.2s;
+  animation: slideIn 0.3s var(--ease);
+}
+.ai-activity-item:hover { background: var(--cream-dark); }
+.ai-activity-item .ai-item-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+.ai-activity-item .ai-item-icon.file { background: rgba(139, 115, 85, 0.12); color: var(--earth); }
+.ai-activity-item .ai-item-icon.email { background: rgba(198, 123, 92, 0.12); color: var(--terracotta); }
+.ai-activity-item .ai-item-icon.web { background: rgba(107, 142, 155, 0.12); color: var(--info); }
+.ai-activity-item .ai-item-icon.agent { background: rgba(122, 139, 111, 0.12); color: var(--sage); }
+.ai-activity-item .ai-item-text { flex: 1; line-height: 1.4; }
+.ai-activity-item .ai-item-time { font-size: 0.7rem; color: var(--text-light); white-space: nowrap; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Activity toggle button */
+.ai-activity-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  background: var(--earth);
+  color: var(--warm-white);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  transition: all 0.3s var(--ease-bounce);
+}
+.ai-activity-toggle:hover {
+  background: var(--earth-dark);
+  transform: scale(1.08);
+}
+.ai-activity-toggle svg { width: 20px; height: 20px; }
+.ai-activity-toggle .toggle-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: var(--terracotta);
+  border: 2px solid var(--warm-white);
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+/* ─── AI Quick Actions (floating) ─── */
+.ai-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: var(--warm-white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  margin: 16px 0;
+}
+.ai-quick-actions-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--earth-dark);
+  margin-bottom: 4px;
+}
+.ai-quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.ai-quick-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.ai-quick-action:hover {
+  background: var(--earth);
+  color: var(--warm-white);
+  border-color: var(--earth);
+  box-shadow: 0 2px 8px rgba(139, 115, 85, 0.2);
+}
+.ai-quick-action svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ─── Enhanced Cards ─── */
+.card {
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ─── Page Header Enhancement ─── */
+.page-header h1 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+.page-header .subtitle {
+  font-weight: 300;
+}
+
+/* ─── Toast Enhancement ─── */
+.toast {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 253, 249, 0.95);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .ai-activity-feed {
+    width: calc(100% - 40px);
+    right: 20px;
+    bottom: 70px;
+  }
+  .ai-suggestions-bar {
+    padding: 10px 16px;
+  }
+  .ai-quick-actions-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boubane — Votre IA locale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/mail.css">
+</head>
+<body>
+
+<!-- Mobile menu button -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">B</div>
+      <div class="brand-text">boubane<span>.</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Tableau de bord</div>
+      <button class="nav-item active" data-page="dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Vue d'ensemble
+      </button>
+
+      <div class="nav-section-title">Outils</div>
+      <button class="nav-item" data-page="files">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Fichiers
+        <span class="badge" id="file-count">0</span>
+      </button>
+      <button class="nav-item" data-page="web">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Navigation web
+      </button>
+      <button class="nav-item" data-page="emails">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+        Emails
+        <span class="badge" id="email-count">0</span>
+      </button>
+
+      <div class="nav-section-title">Système</div>
+      <button class="nav-item" data-page="activity">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Activité
+      </button>
+      <button class="nav-item" data-page="settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configuration
+      </button>
+
+      <div class="nav-section-title">Hermes</div>
+      <button class="nav-item" data-page="hermes">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Vue d\'ensemble
+      </button>
+      <button class="nav-item" data-page="hermes-chat">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat 
+        <span class="badge" id="hermes-msg-badge" style="display:none;">•</span>
+      </button>
+      <button class="nav-item" data-page="hermes-sessions">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Sessions
+      </button>
+      <button class="nav-item" data-page="hermes-skills">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Skills
+      </button>
+      <button class="nav-item" data-page="hermes-system">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Système
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <div class="status-dot"></div>
+        Agent en ligne
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD PAGE ─── -->
+    <section class="page-section active" id="page-dashboard">
+      <div class="page-header fade-in">
+        <h1>Bonjour 👋</h1>
+        <p class="subtitle">Votre agent IA local est prêt. Que voulez-vous faire ?</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card fade-in delay-1">
+          <div class="stat-value" id="stat-files">0</div>
+          <div class="stat-label">Fichiers analysés</div>
+        </div>
+        <div class="stat-card fade-in delay-2">
+          <div class="stat-value" id="stat-web">0</div>
+          <div class="stat-label">Pages visitées</div>
+        </div>
+        <div class="stat-card fade-in delay-3">
+          <div class="stat-value" id="stat-emails">0</div>
+          <div class="stat-label">Emails reçus</div>
+        </div>
+        <div class="stat-card fade-in delay-4">
+          <div class="stat-value" id="stat-unread">0</div>
+          <div class="stat-label">Non lus</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Activité récente</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('activity')">Voir tout</button>
+          </div>
+          <div class="activity-feed" id="dashboard-activity">
+            <div class="empty-state">
+              <p>Aucune activité pour le moment</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Fichiers récents</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('files')">Voir tout</button>
+          </div>
+          <div class="file-list" id="dashboard-files">
+            <div class="empty-state">
+              <p>Aucun fichier analysé</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── EMAILS QUICK CARD ─── -->
+      <div class="card fade-in delay-4" style="margin-top:1.5rem;">
+        <div class="card-header">
+          <div class="card-title">Boîte mail</div>
+          <button class="btn btn-ghost btn-sm" onclick="switchPage('emails')">Ouvrir la messagerie</button>
+        </div>
+        <div class="email-quick-stats" id="email-quick-stats">
+          <div class="email-quick-item">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--earth)" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+            <span id="quick-total">0</span> emails
+          </div>
+          <div class="email-quick-item highlight">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--terracotta)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="quick-unread">0</span> non lus
+          </div>
+        </div>
+        <div class="email-quick-list" id="email-quick-list">
+          <div class="empty-state"><p>Chargement...</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── FILES PAGE ─── -->
+    <section class="page-section" id="page-files">
+      <div class="page-header fade-in">
+        <h1>Fichiers</h1>
+        <p class="subtitle">Uploadez vos documents pour analyse — PDF, Word, Excel, images</p>
+      </div>
+
+      <div class="card fade-in delay-1" style="margin-bottom: 1.5rem;">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div class="upload-text">Déposez vos fichiers ici</div>
+          <div class="upload-hint">ou cliquez pour parcourir — PDF, DOCX, XLSX, CSV, images</div>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp" style="display:none">
+      </div>
+
+      <div class="card fade-in delay-2">
+        <div class="card-header">
+          <div class="card-title">Fichiers analysés</div>
+        </div>
+        <div class="file-list" id="file-list">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Aucun fichier</h3>
+            <p>Uploadez un document pour commencer</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── WEB PAGE ─── -->
+    <section class="page-section" id="page-web">
+      <div class="page-header fade-in">
+        <h1>Navigation web</h1>
+        <p class="subtitle">Boubane navigue pour vous et extrait les informations clés</p>
+      </div>
+
+      <div class="card fade-in delay-1" style="margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label class="form-label">URL à visiter</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="url" class="form-input" id="web-url" placeholder="https://exemple.com" style="flex:1;">
+            <select class="form-input" id="web-task-type" style="width:160px;">
+              <option value="scrape">Extraire contenu</option>
+              <option value="summarize">Résumer</option>
+              <option value="extract_links">Extraire liens</option>
+            </select>
+            <button class="btn btn-primary" onclick="browseWeb()">Visiter</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Résultat</div>
+          </div>
+          <div class="web-result" id="web-result">
+            Entrez une URL ci-dessus pour commencer
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Historique</div>
+          </div>
+          <div class="activity-feed" id="web-history">
+            <div class="empty-state">
+              <p>Aucune page visitée</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMAILS PAGE ─── -->
+    <section class="page-section" id="page-emails">
+      <!-- Top toolbar (Gmail-style) -->
+      <div class="mail-toolbar fade-in">
+        <div class="mail-toolbar-left">
+          <button class="mail-tb-btn" id="mail-btn-back-list" onclick="mailBackToList()" title="Retour à la liste" style="display:none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <label class="mail-check-all" onclick="event.stopPropagation()">
+            <input type="checkbox" id="mail-check-all" onchange="mailSelectAll()">
+            <span class="mail-check-box"></span>
+          </label>
+          <select id="mail-folder-select" class="mail-folder-pill" onchange="mailSwitchFolder()">
+            <option value="INBOX">Boîte de réception</option>
+            <option value="[Gmail]/Sent Mail">Envoyés</option>
+            <option value="[Gmail]/Drafts">Brouillons</option>
+            <option value="[Gmail]/Trash">Corbeille</option>
+          </select>
+          <span class="mail-count" id="mail-count-label">0 messages</span>
+          <!-- Bulk action bar -->
+          <div class="mail-bulk-bar" id="mail-bulk-bar" style="display:none;">
+            <span class="mail-bulk-count" id="mail-bulk-count">0 sélectionnés</span>
+            <button class="mail-tb-btn" onclick="mailArchiveSelected()" title="Archiver">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8"/><polyline points="1 3 23 3"/><path d="M10 12h4"/></svg>
+            </button>
+            <button class="mail-tb-btn" onclick="mailDeleteSelected()" title="Supprimer">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+            <button class="mail-tb-btn" onclick="mailMarkReadSelected(true)" title="Marquer lu">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+            </button>
+            <button class="mail-tb-btn" onclick="mailMarkReadSelected(false)" title="Marquer non lu">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="mail-toolbar-right">
+          <div class="mail-search-box" id="mail-search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="mail-search-input" placeholder="Rechercher dans les emails" oninput="mailFilter()">
+            <button class="mail-search-clear" id="mail-search-clear" onclick="mailClearSearch()" style="display:none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <button class="mail-tb-btn" onclick="mailRefresh()" title="Actualiser">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          </button>
+          <button class="mail-tb-btn" onclick="mailAutoToggle()" title="Automatisation IA">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Master–detail split -->
+      <div class="mail-layout fade-in delay-1">
+        <!-- List pane -->
+        <div class="mail-list-pane" id="mail-list-pane">
+          <div class="mail-list-inner" id="mail-list-inner"></div>
+        </div>
+        <!-- Detail pane -->
+        <div class="mail-detail-pane" id="mail-detail-pane">
+          <div class="mail-detail-empty">
+            <div class="mail-detail-empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+            </div>
+            <p class="mail-detail-empty-text">Sélectionnez un message</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compose FAB -->
+      <button class="mail-fab" onclick="mailCompose()" title="Nouveau message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+
+      <!-- Compose modal -->
+      <div class="mail-compose-overlay" id="mail-compose-overlay">
+        <div class="mail-compose">
+          <div class="mail-compose-header">
+            <span>Nouveau message</span>
+            <button class="mail-compose-close" onclick="mailComposeClose()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="mail-compose-fields">
+            <div class="mail-compose-field">
+              <label>À</label>
+              <input type="email" id="compose-to" placeholder="destinataire@email.com">
+            </div>
+            <div class="mail-compose-field">
+              <label>Objet</label>
+              <input type="text" id="compose-subject" placeholder="Objet du message">
+            </div>
+          </div>
+          <textarea class="mail-compose-body" id="compose-body" placeholder="Écrire le message..."></textarea>
+          <div class="mail-compose-footer">
+            <button class="btn btn-primary btn-sm" onclick="mailComposeSend()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Envoyer
+            </button>
+            <button class="mail-compose-discard" onclick="mailComposeClose()">Supprimer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auto-process panel -->
+      <div class="mail-auto-panel" id="mail-auto-panel" style="display:none;">
+        <div class="mail-auto-header">
+          <span style="font-weight:600;">Automatisation IA</span>
+          <button class="mail-compose-close" onclick="document.getElementById('mail-auto-panel').style.display='none'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="mail-auto-body">
+          <div class="mail-auto-section">
+            <label class="mail-auto-toggle">
+              <input type="checkbox" id="auto-enabled" onchange="mailAutoSave()">
+              <span class="mail-check-box"></span>
+              <span>Activé</span>
+            </label>
+            <label class="mail-auto-toggle">
+              <input type="checkbox" id="auto-sort" onchange="mailAutoSave()">
+              <span class="mail-check-box"></span>
+              <span>Tri automatique</span>
+            </label>
+            <label class="mail-auto-toggle">
+              <input type="checkbox" id="auto-reply" onchange="mailAutoSave()">
+              <span class="mail-check-box"></span>
+              <span>Réponse brouillon IA</span>
+            </label>
+          </div>
+          <div class="mail-auto-section">
+            <button class="btn btn-primary btn-sm" onclick="mailAutoProcessNow()">Lancer maintenant</button>
+            <button class="btn btn-secondary btn-sm" onclick="mailAutoViewLog()">Voir log</button>
+          </div>
+          <div id="mail-auto-log" style="display:none;max-height:200px;overflow:auto;font-size:0.78rem;line-height:1.5;color:var(--text-muted);background:var(--cream);border-radius:var(--radius-sm);padding:0.75rem;margin-top:0.75rem;"></div>
+          <div id="mail-auto-result" style="margin-top:0.75rem;font-size:0.85rem;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ACTIVITY PAGE ─── -->
+    <section class="page-section" id="page-activity">
+      <div class="page-header fade-in">
+        <h1>Activité</h1>
+        <p class="subtitle">Historique complet des actions de votre agent</p>
+      </div>
+
+      <div class="card fade-in delay-1">
+        <div class="card-header">
+          <div class="card-title">Journal d'activité</div>
+        </div>
+        <div class="activity-feed" id="full-activity-log">
+          <div class="empty-state">
+            <p>Aucune activité enregistrée</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SETTINGS PAGE ─── -->
+    <section class="page-section" id="page-settings">
+      <div class="page-header fade-in">
+        <h1>Configuration</h1>
+        <p class="subtitle">Paramètres de votre agent Boubane</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-1">
+          <div class="card-header">
+            <div class="card-title">Boîte mail</div>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.75rem;">La configuration IMAP/SMTP n'est plus gérée depuis cette page.</p>
+          <button class="btn btn-secondary" onclick="switchPage('emails')">Ouvrir le gestionnaire de mails</button>
+        </div>
+
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Agent</div>
+          </div>
+          <div id="agent-status">
+            <p style="color:var(--text-muted);">Chargement...</p>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
+          <div style="font-size:0.85rem;color:var(--text-muted);">
+            <p><strong>Version :</strong> 1.0.0</p>
+            <p><strong>Fonctionnalités :</strong></p>
+            <ul style="margin-left:1.25rem;margin-top:0.25rem;">
+              <li>Analyse de fichiers (PDF, DOCX, XLSX, images)</li>
+              <li>Navigation web autonome</li>
+              <li>Gestion email (IMAP/SMTP)</li>
+              <li>Dashboard temps réel</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Hermes Agent</div>
+          </div>
+          <div id="hermes-status">
+            <p style="color:var(--text-muted);">Chargement...</p>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
+          <div style="font-size:0.85rem;color:var(--text-muted);">
+            <p><strong>Intégration :</strong></p>
+            <ul style="margin-left:1.25rem;margin-top:0.25rem;">
+              <li>Client local Hermes (port 8642)</li>
+              <li>Exécution de skills distants</li>
+              <li>État du système en temps réel</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HERMES OVERVIEW ─── -->
+    <section class="page-section" id="page-hermes">
+      <div class="page-header fade-in">
+        <h1>Hermes Agent</h1>
+        <p class="subtitle">Vue d\'ensemble de votre agent Hermes — sessions, coûts, santé</p>
+      </div>
+
+      <div class="hermes-stats-row" id="hermes-overview-stats">
+        <div class="stat-card fade-in delay-1">
+          <div class="stat-value" id="hermes-stat-sessions">—</div>
+          <div class="stat-label">Sessions actives</div>
+        </div>
+        <div class="stat-card fade-in delay-2">
+          <div class="stat-value" id="hermes-stat-total">—</div>
+          <div class="stat-label">Sessions totales</div>
+        </div>
+        <div class="stat-card fade-in delay-3">
+          <div class="stat-value" id="hermes-stat-cost">—</div>
+          <div class="stat-label">Coût estimé (USD)</div>
+        </div>
+        <div class="stat-card fade-in delay-4">
+          <div class="stat-value" id="hermes-stat-tokens">—</div>
+          <div class="stat-label">Tokens totaux</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Sessions récentes</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('hermes-sessions')">Voir tout</button>
+          </div>
+          <div class="hermes-session-list" id="hermes-recent-sessions">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3">
+          <div class="card-header">
+            <div class="card-title">Statut Gateway</div>
+          </div>
+          <div id="hermes-gateway-status">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HERMES CHAT ─── -->
+    <section class="page-section" id="page-hermes-chat">
+      <div class="page-header fade-in">
+        <h1>Chat Hermes</h1>
+        <p class="subtitle">Interface de conversation en temps réel avec votre agent Hermes</p>
+      </div>
+
+      <div class="hermes-chat-card card fade-in delay-1">
+        <div class="hermes-chat-header">
+          <div class="hermes-chat-status">
+            <div class="hermes-chat-dot" id="hermes-chat-dot"></div>
+            <span id="hermes-chat-status-text">Connexion...</span>
+          </div>
+          <div>
+            <button class="btn btn-ghost btn-sm" onclick="hermesNewChat()">Nouveau chat</button>
+          </div>
+        </div>
+        <div class="hermes-chat-messages" id="hermes-chat-messages">
+          <div class="hermes-chat-welcome">
+            <div class="hermes-chat-logo">H</div>
+            <p>Bienvenue dans l\'interface Hermes</p>
+            <p class="hermes-chat-hint">Posez une question ou donnez une instruction à votre agent.</p>
+          </div>
+        </div>
+        <div class="hermes-chat-input-area">
+          <textarea class="hermes-chat-input" id="hermes-chat-input" rows="2" placeholder="Envoyer un message à Hermes..." onkeydown="if(event.key==\'Enter\'&&!event.shiftKey){event.preventDefault();hermesSendMessage()}"></textarea>
+          <button class="btn btn-primary hermes-send-btn" onclick="hermesSendMessage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HERMES SESSIONS ─── -->
+    <section class="page-section" id="page-hermes-sessions">
+      <div class="page-header fade-in">
+        <h1>Sessions Hermes</h1>
+        <p class="subtitle">Historique complet des sessions de votre agent</p>
+      </div>
+      <div class="hermes-sessions-controls fade-in delay-1">
+        <div class="form-group" style="margin:0;flex:1;">
+          <input type="text" class="form-input" id="hermes-sessions-search" placeholder="Rechercher une session..." oninput="hermesFilterSessions()" style="max-width:400px;">
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="hermesLoadSessions()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          Actualiser
+        </button>
+      </div>
+      <div class="card fade-in delay-2" id="hermes-sessions-list">
+        <div class="empty-state"><p>Chargement...</p></div>
+      </div>
+      <!-- Session detail modal -->
+      <div class="modal-overlay" id="hermes-session-modal">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 id="hermes-modal-title">Session</h3>
+            <button class="modal-close" onclick="hermesCloseSessionModal()">✕</button>
+          </div>
+          <div class="hermes-session-messages" id="hermes-session-messages">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HERMES SKILLS ─── -->
+    <section class="page-section" id="page-hermes-skills">
+      <div class="page-header fade-in">
+        <h1>Skills Hermes</h1>
+        <p class="subtitle">Compétences et automatisations disponibles dans votre agent</p>
+      </div>
+      <div class="grid-2">
+        <div class="card fade-in delay-1">
+          <div class="card-header">
+            <div class="card-title">Skills installées</div>
+            <button class="btn btn-ghost btn-sm" onclick="hermesLoadSkills()">Actualiser</button>
+          </div>
+          <div class="hermes-skills-grid" id="hermes-skills-list">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">À propos des Skills</div>
+          </div>
+          <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.7;">
+            <p style="margin-bottom:1rem;">Les <strong>skills</strong> sont des procédures réutilisables qu\'Hermes apprend et exécute. Elles se trouvent dans <code style="font-size:0.8rem;">~/.hermes/skills/</code>.</p>
+            <p style="margin-bottom:0.5rem;"><strong>Catégories :</strong></p>
+            <ul style="margin-left:1.25rem;margin-bottom:1rem;">
+              <li>🧠 <strong>autonomous-ai-agents</strong> — Agent orchestration</li>
+              <li>🔧 <strong>builder-core</strong> — Développement</li>
+              <li>🎨 <strong>creative</strong> — Design & contenu</li>
+              <li>📊 <strong>data-science</strong> — Analyse données</li>
+              <li>🐳 <strong>devops</strong> — Infrastructure</li>
+              <li>📬 <strong>email</strong> — Gestion email</li>
+              <li>🐙 <strong>github</strong> — GitHub workflows</li>
+              <li>🎮 <strong>gaming</strong> — Serveurs de jeu</li>
+              <li>🏠 <strong>smart-home</strong> — Domotique</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── HERMES SYSTEM ─── -->
+    <section class="page-section" id="page-hermes-system">
+      <div class="page-header fade-in">
+        <h1>Système Hermes</h1>
+        <p class="subtitle">Informations techniques, santé et configuration de l\'agent</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card fade-in delay-1">
+          <div class="card-header">
+            <div class="card-title">Santé Gateway</div>
+          </div>
+          <div id="hermes-sys-health">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+
+        <div class="card fade-in delay-2">
+          <div class="card-header">
+            <div class="card-title">Distribution des sessions</div>
+          </div>
+          <div id="hermes-sys-distribution">
+            <div class="empty-state"><p>Chargement...</p></div>
+          </div>
+        </div>
+
+        <div class="card fade-in delay-3" style="grid-column:1/-1;">
+          <div class="card-header">
+            <div class="card-title">Commandes utiles</div>
+          </div>
+          <div style="font-size:0.85rem;line-height:1.6;">
+            <pre class="hermes-code-block">hermes status               # Statut général
+hermes doctor               # Diagnostic
+hermes session list         # Lister les sessions (CLI)
+hermes skills list          # Lister les skills
+hermes cron list            # Voir les tâches planifiées
+hermes gateway status       # Statut gateway
+hermes model                # Changer de modèle</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div class="toast-container" id="toast-container"></div>
+
+
+<script src="/static/js/app.js?v=4"></script>
+</body>
+</html>

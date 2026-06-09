@@ -19,4 +19,4 @@ mkdir -p data/{uploads,db,cache}
 
 # Run
 echo "🚀 Boubane Agent starting on http://localhost:3000"
-python -m uvicorn app.main:app --host 0.0.0.0 --port 3000 --reload
+python -m uvicorn app.main:app --host 0.0.0.0 --port 3001 --reload

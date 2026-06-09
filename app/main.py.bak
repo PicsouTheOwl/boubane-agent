@@ -48,10 +48,12 @@ async def dashboard(request: Request):
 # ─── API Routes ───
 from app.modules.files import router as files_router
 from app.modules.web import router as web_router
+from app.modules.email import router as email_router
 from app.modules.agent import router as agent_router
 
 app.include_router(files_router, prefix="/api/files", tags=["files"])
 app.include_router(web_router, prefix="/api/web", tags=["web"])
+app.include_router(email_router, prefix="/api/email", tags=["email"])
 app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
 
 # ─── Himalaya Mail Bridge ───
@@ -65,18 +67,6 @@ app.include_router(auto_router, tags=["auto-process"])
 # ─── Hermes Agent Routes ───
 from app.modules.hermes.routes import router as hermes_router
 app.include_router(hermes_router, tags=["hermes"])
-
-# ─── Business Module ───
-from app.modules.business import router as business_router
-app.include_router(business_router, prefix="/api/business", tags=["business"])
-
-# ─── Calendar Module ───
-from app.modules.calendar import router as calendar_router
-app.include_router(calendar_router, prefix="/api/calendar", tags=["calendar"])
-
-# ─── Kanban Module ───
-from app.modules.kanban import router as kanban_router
-app.include_router(kanban_router, tags=["kanban"])
 
 
 # ─── Health ───

@@ -149,7 +149,33 @@ async def get_file(file_id: int, db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.delete("/{file_id}")
+@router.get("/download/{file_id}")
+async def download_file(file_id: int, db: AsyncSession = Depends(get_db)):
+    """Download a file"""
+    result = await db.execute(select(FileRecord).where(FileRecord.id == file_id))
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(404, "File not found")
+    file_path = Path(settings.UPLOAD_DIR) / record.filename
+    if not file_path.exists():
+        raise HTTPException(404, "File not found on disk")
+    from fastapi.responses import FileResponse
+    return FileResponse(
+        str(file_path),
+        filename=record.original_name,
+        media_type="application/octet-stream",
+    )
+
+
+@router.get("/")
+async def list_files_root(
+    limit: int = 50,
+    offset: int = 0,
+    file_type: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """List analyzed files (root endpoint)"""
+    return await list_files(limit, offset, file_type, db)
 async def delete_file(file_id: int, db: AsyncSession = Depends(get_db)):
     """Delete a file"""
     result = await db.execute(select(FileRecord).where(FileRecord.id == file_id))
