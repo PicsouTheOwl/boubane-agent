@@ -29,6 +29,25 @@ async def hermes_chat(req: ChatRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+@router.post("/chat/stream")
+async def hermes_chat_stream(req: ChatRequest):
+    """Stream chat with Hermes AI — Server-Sent Events"""
+    from fastapi.responses import StreamingResponse
+
+    async def _generate():
+        try:
+            async for chunk in hermes_client.chat_stream(
+                messages=req.messages,
+                model=req.model,
+                max_tokens=req.max_tokens,
+                temperature=req.temperature,
+            ):
+                yield chunk
+        except Exception as e:
+            yield json.dumps({"error": str(e)}) + "\n"
+
+    return StreamingResponse(_generate(), media_type="text/event-stream")
+
 @router.get("/sessions")
 async def list_sessions(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0)):
     """List Hermes gateway sessions"""

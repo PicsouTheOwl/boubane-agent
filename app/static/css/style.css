@@ -514,6 +514,20 @@ body:has(.mail-detail-pane.mobile-show) .mobile-menu-btn {
 .chat-msg.assistant .chat-msg-bubble {
   background:var(--bg-surface-2); border:1px solid var(--border); border-bottom-left-radius:var(--r-sm);
 }
+/* Streaming cursor */
+.chat-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 .chat-msg-loading { display:flex; gap:3px; padding:0.35rem 0; }
 .chat-msg-loading span {
   width:5px; height:5px; border-radius:50%; background:var(--text-muted);

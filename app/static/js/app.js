@@ -993,13 +993,59 @@
     const w = c.querySelector('.chat-welcome'); if (w) w.remove();
     chatAdd('user', msg);
     chatMsgs.push({ role:'user', content:msg });
+
+    // Create streaming assistant bubble
     const load = document.createElement('div');
     load.className = 'chat-msg assistant'; load.id = 'chat-load';
-    load.innerHTML = `<div class="chat-msg-avatar">B</div><div><div class="chat-msg-loading"><span></span><span></span><span></span></div></div>`;
+    load.innerHTML = `<div class="chat-msg-avatar">B</div><div><div class="chat-msg-bubble" id="chat-stream-bubble"><span class="chat-cursor">▊</span></div></div>`;
     c.appendChild(load); c.scrollTop = c.scrollHeight;
-    api('/api/hermes/chat',{method:'POST',body:JSON.stringify({messages:chatMsgs.map(m=>({role:m.role,content:m.content}))})})
-      .then(d => { const e=$('chat-load'); if(e)e.remove(); const r=d.response||d.content||d.message||JSON.stringify(d); chatAdd('assistant',r); chatMsgs.push({role:'assistant',content:r}); })
-      .catch(e => { const el=$('chat-load'); if(el)el.remove(); chatAdd('assistant','⚠️ '+e.message); });
+
+    // Stream via fetch + ReadableStream (SSE)
+    const bubble = $('chat-stream-bubble');
+    let fullText = '';
+    fetch('/api/hermes/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatMsgs.map(m=>({role:m.role,content:m.content})) }),
+    }).then(resp => {
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      function read() {
+        reader.read().then(({done, value}) => {
+          if (done) {
+            const el = $('chat-load'); if (el) el.remove();
+            if (fullText) chatMsgs.push({role:'assistant', content:fullText});
+            return;
+          }
+          buf += decoder.decode(value, {stream: true});
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const d = line[6:].trim();
+              if (d === '[DONE]') continue;
+              try {
+                const data = JSON.parse(d);
+                if (data.delta) {
+                  fullText += data.delta;
+                  bubble.innerHTML = esc(fullText) + '<span class="chat-cursor">▊</span>';
+                  c.scrollTop = c.scrollHeight;
+                }
+              } catch(err) {}
+            }
+          }
+          read();
+        }).catch(err => {
+          const el = $('chat-load'); if (el) el.remove();
+          if (!fullText) chatAdd('assistant', '⚠️ ' + err.message);
+        });
+      }
+      read();
+    }).catch(e => {
+      const el = $('chat-load'); if (el) el.remove();
+      chatAdd('assistant', '⚠️ ' + e.message);
+    });
   };
 
   function chatAdd(role, text) {

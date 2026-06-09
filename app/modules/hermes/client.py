@@ -1,4 +1,5 @@
 """Hermes Agent client — enhanced with full API proxy support"""
+import json
 import httpx
 import os
 from typing import Optional, Dict, Any, List
@@ -119,11 +120,37 @@ class HermesClient:
                 f"{HERMES_GATEWAY_URL}/v1/chat/completions",
                 json={"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature},
                 headers=self._headers(),
-                timeout=60.0,
+                timeout=120.0,
             )
             return resp.json()
         except Exception as e:
             return {"error": str(e)}
+
+    async def chat_stream(self, messages: list, model: str = "default", max_tokens: int = 512, temperature: float = 0.3):
+        """Stream chat response from Hermes gateway — yields SSE lines"""
+        try:
+            async with self.client.stream(
+                "POST",
+                f"{HERMES_GATEWAY_URL}/v1/chat/completions",
+                json={"model": model, "messages": messages, "max_tokens": max_tokens, "temperature": temperature, "stream": True},
+                headers=self._headers(),
+                timeout=120.0,
+            ) as resp:
+                async for line in resp.aiter_lines():
+                    if line.startswith("data: "):
+                        data_str = line[6:].strip()
+                        if data_str == "[DONE]":
+                            yield "data: [DONE]\n\n"
+                            continue
+                        try:
+                            chunk = json.loads(data_str)
+                            delta = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                            if delta:
+                                yield json.dumps({"delta": delta}) + "\n"
+                        except json.JSONDecodeError:
+                            continue
+        except Exception as e:
+            yield json.dumps({"error": str(e)}) + "\n"
 
     async def close(self):
         await self.client.aclose()
