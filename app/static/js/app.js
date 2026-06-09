@@ -37,9 +37,12 @@
   const $ = id => document.getElementById(id);
 
   async function api(url, opts = {}) {
-    const r = await fetch(url.startsWith('/api/') ? API + url : url, { headers:{'Content-Type':'application/json'}, ...opts });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
+    const fullUrl = url.startsWith('/api/') ? API + url : url;
+    try {
+      const r = await fetch(fullUrl, { headers:{'Content-Type':'application/json'}, ...opts });
+      if (!r.ok) { const body = await r.text(); console.error(`API ${r.status}: ${fullUrl}`, body); throw new Error(`HTTP ${r.status}`); }
+      return await r.json();
+    } catch(e) { console.error(`API FAIL: ${fullUrl}`, e); throw e; }
   }
 
   function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
@@ -113,6 +116,9 @@
     if (page === 'auto-reply') { loadAutoConfig(); loadAutoLog(); }
     if (page === 'agent-chat') { setTimeout(() => $('chat-input')?.focus(), 100); }
   };
+
+  // Legacy alias
+  window.switchPage = function(page) { go(page); };
 
   window.toggleSidebar = function() {
     document.getElementById('sidebar').classList.toggle('open');
