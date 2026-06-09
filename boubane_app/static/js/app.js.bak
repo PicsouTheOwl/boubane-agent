@@ -1,0 +1,1371 @@
+/**
+ * BOUBANE DASHBOARD — Frontend Application
+ */
+(function() {
+  'use strict';
+
+  // ─── State ───
+  let currentPage = 'dashboard';
+  let currentEmailId = null;
+
+  // ─── Init ───
+  document.addEventListener('DOMContentLoaded', () => {
+    initNavigation();
+    initUpload();
+    loadStats();
+    loadActivity();
+    
+    // Refresh stats every 30s
+    setInterval(loadStats, 30000);
+    // Load dashboard email widget
+    if (typeof loadDashboardEmails === 'function') loadDashboardEmails();
+  });
+
+  // ─── Navigation ───
+  function initNavigation() {
+    document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        switchPage(page);
+      });
+    });
+  }
+
+  function switchPage(page) {
+    currentPage = page;
+    
+    // Update nav
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+    
+    // Update sections
+    document.querySelectorAll('.page-section').forEach(section => {
+      section.classList.toggle('active', section.id === `page-${page}`);
+    });
+    
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    
+    // Page-specific loading
+    if (page === 'files') loadFiles();
+    if (page === 'web') loadWebHistory();
+    if (page === 'emails') { mailLoadFolders(); mailRefresh(); }
+    if (page === 'activity') loadActivity();
+    if (page === 'settings') loadAgentStatus();
+    
+    // Hermes pages
+    if (page === 'hermes') loadHermesOverview();
+    if (page === 'hermes-chat') hermesCheckStatus();
+    if (page === 'hermes-sessions') hermesLoadSessions();
+    if (page === 'hermes-skills') hermesLoadSkills();
+    if (page === 'hermes-system') hermesLoadSystem();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Mobile-friendly helper: relative time display
+  function formatRelativeTime(iso) {
+    if (!iso) return '';
+    try {
+      const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+      if (diff < 60) return "à l'instant";
+      if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+      if (diff < 86400) return `il y a ${Math.floor(diff/3600)} h`;
+      return new Date(iso).toLocaleDateString('fr-FR');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // ─── API Helper ───
+  const API_BASE = '/boubane';
+  async function api(url, options = {}) {
+    const fullUrl = url.startsWith('/api/') ? API_BASE + url : url;
+    try {
+      const resp = await fetch(fullUrl, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${resp.status}`);
+      }
+      return await resp.json();
+    } catch (e) {
+      console.error('API error:', e);
+      throw e;
+    }
+  }
+
+  // ─── Toast ───
+  function toast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = message;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 400);
+    }, 3500);
+  }
+
+  // ─── Stats ───
+  async function loadStats() {
+    try {
+      const stats = await api('/api/agent/stats').catch(() => null);
+      const files = stats?.files?.total ?? 0;
+      const web = stats?.web?.total ?? 0;
+      setText('stat-files', files);
+      setText('stat-web', web);
+      const fileBadge = document.getElementById('file-count');
+      if (fileBadge) fileBadge.textContent = files;
+      if (stats?.recent_activity?.length) {
+        renderActivity('dashboard-activity', stats.recent_activity);
+      }
+    } catch (e) {
+      console.warn('Stats load failed:', e);
+    }
+  }
+
+  // ─── Files ───
+  function initUpload() {
+    const zone = document.getElementById('upload-zone');
+    const input = document.getElementById('file-input');
+    
+    if (!zone || !input) return;
+    
+    input.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFiles(e.target.files);
+      }
+    });
+    
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    
+    zone.addEventListener('dragleave', () => {
+      zone.classList.remove('drag-over');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    });
+  }
+
+  async function handleFiles(files) {
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const result = await fetch(API_BASE + '/api/files/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!result.ok) {
+          const err = await result.json().catch(() => ({}));
+          throw new Error(err.detail || `Upload failed`);
+        }
+        
+        const data = await result.json();
+        toast(`✓ "${data.filename}" analysé (${formatSize(data.size)})`, 'success');
+      } catch (e) {
+        toast(`✗ Erreur: ${e.message}`, 'error');
+      }
+    }
+    
+    loadFiles();
+    loadStats();
+  }
+
+  async function loadFiles() {
+    try {
+      const data = await api('/api/files/list?limit=20');
+      renderFileList('file-list', data.files);
+      
+      if (data.files.length > 0) {
+        renderFileList('dashboard-files', data.files.slice(0, 5));
+      }
+    } catch (e) {
+      console.warn('Files load failed:', e);
+    }
+  }
+
+  function renderFileList(containerId, files) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (!files || files.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Aucun fichier</p></div>';
+      return;
+    }
+    
+    container.innerHTML = files.map(f => `
+      <div class="file-item" onclick="viewFile(${f.id})">
+        <div class="file-icon ${f.type}">${f.type}</div>
+        <div class="file-info">
+          <div class="file-name">${escapeHtml(f.filename)}</div>
+          <div class="file-meta">${formatSize(f.size)} · ${f.tags?.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ') || ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function viewFile(id) {
+    try {
+      const file = await api(`/api/files/${id}`);
+      const modal = document.getElementById('email-modal');
+      document.getElementById('modal-email-subject').textContent = file.filename;
+      document.getElementById('modal-email-from').textContent = `${file.type} · ${formatSize(file.size)}`;
+      document.getElementById('modal-email-date').textContent = file.created_at ? new Date(file.created_at).toLocaleString('fr-FR') : '';
+      document.getElementById('modal-email-body').textContent = file.summary + (file.text ? '\n\n---\n\n' + file.text.substring(0, 2000) : '');
+      document.getElementById('modal-email-ai').style.display = 'none';
+      modal.classList.add('open');
+    } catch (e) {
+      toast('Erreur: ' + e.message, 'error');
+    }
+  }
+
+  // ─── Web ───
+  async function browseWeb() {
+    const url = document.getElementById('web-url').value.trim();
+    const taskType = document.getElementById('web-task-type').value;
+    
+    if (!url) {
+      toast('Entrez une URL', 'error');
+      return;
+    }
+    
+    const resultEl = document.getElementById('web-result');
+    resultEl.innerHTML = '<div class="loading-spinner" style="margin:2rem auto;"></div>';
+    
+    try {
+      const data = await api('/api/web/browse', {
+        method: 'POST',
+        body: JSON.stringify({ url, task_type: taskType }),
+      });
+      
+      if (data.status === 'done') {
+        resultEl.textContent = data.result || 'Aucun contenu extrait';
+        toast('✓ Page visitée avec succès', 'success');
+      } else {
+        resultEl.textContent = `Erreur: ${data.error || 'Inconnue'}`;
+        toast('Erreur lors de la visite', 'error');
+      }
+      
+      loadWebHistory();
+      loadStats();
+    } catch (e) {
+      resultEl.textContent = `Erreur: ${e.message}`;
+      toast('Erreur: ' + e.message, 'error');
+    }
+  }
+
+  async function loadWebHistory() {
+    try {
+      const data = await api('/api/web/tasks?limit=10');
+      const container = document.getElementById('web-history');
+      if (!container) return;
+      
+      if (!data.tasks || data.tasks.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Aucune page visitée</p></div>';
+        return;
+      }
+      
+      container.innerHTML = data.tasks.map(t => `
+        <div class="activity-item">
+          <div class="activity-dot ${t.status === 'done' ? 'green' : 'orange'}"></div>
+          <div>
+            <div class="activity-text"><strong>${escapeHtml(t.type)}</strong> — ${escapeHtml(t.url.substring(0, 60))}</div>
+            <div class="activity-time">${t.status} · ${t.created_at ? new Date(t.created_at).toLocaleString('fr-FR') : ''}</div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      console.warn('Web history load failed:', e);
+    }
+  }
+
+  // ─── Emails ───
+  // IMAP/SMTP management is now handled via the dedicated Himalaya mail module.
+  // The legacy `/api/email/*` routes are no longer used from the frontend.
+
+  // ─── Activity ───
+  async function loadActivity() {
+    try {
+      const data = await api('/api/agent/activity?limit=30');
+      renderActivity('full-activity-log', data.activity);
+    } catch (e) {
+      console.warn('Activity load failed:', e);
+    }
+  }
+
+  function renderActivity(containerId, items) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    if (!items || items.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Aucune activité</p></div>';
+      return;
+    }
+    
+    container.innerHTML = items.map(item => {
+      let dotColor = 'clay';
+      if (item.status === 'success') dotColor = 'green';
+      else if (item.status === 'error') dotColor = 'orange';
+      
+      return `
+        <div class="activity-item">
+          <div class="activity-dot ${dotColor}"></div>
+          <div>
+            <div class="activity-text"><strong>${escapeHtml(item.action)}</strong> — ${escapeHtml(item.details || '')}</div>
+            <div class="activity-time">${item.status} · ${item.time ? new Date(item.time).toLocaleString('fr-FR') : ''}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ─── Agent Status ───
+  async function loadAgentStatus() {
+    try {
+      const status = await api('/api/agent/status');
+      const el = document.getElementById('agent-status');
+      if (el) {
+        el.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--sage);"></div>
+            <strong>Agent ${status.agent} v${status.version}</strong>
+          </div>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Status: ${status.status}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">
+            Capacités: ${status.capabilities?.join(', ')}
+          </p>
+        `;
+      }
+    } catch (e) {
+      console.warn('Agent status load failed:', e);
+    }
+    
+    // Also load Hermes status
+    try {
+      const hermesStatus = await api('/api/hermes/status');
+      const hermesEl = document.getElementById('hermes-status');
+      if (hermesEl) {
+        hermesEl.innerHTML = `
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--terracotta);"></div>
+            <strong>Hermes ${hermesStatus.platform}</strong>
+          </div>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Status: ${hermesStatus.status}</p>
+        `;
+      }
+    } catch (e) {
+      console.warn('Hermes status load failed:', e);
+    }
+  }
+
+  // ─── Dashboard email quick card ───
+  async function loadDashboardEmails() {
+    try {
+      const data = await api('/api/himalaya/envelopes?limit=20&folder=INBOX');
+      const envelopes = data.envelopes || [];
+      const total = envelopes.length;
+      const unread = envelopes.filter((e) => !String(e.flags || []).includes('Seen')).length;
+      setText('stat-emails', total);
+      setText('stat-unread', unread);
+      const qt = document.getElementById('quick-total'); if (qt) qt.textContent = total;
+      const qu = document.getElementById('quick-unread'); if (qu) qu.textContent = unread;
+      const eb = document.getElementById('email-count'); if (eb) eb.textContent = unread;
+      const list = document.getElementById('email-quick-list');
+      if (!list) return;
+      list.innerHTML = envelopes.slice(0, 3).map((e) => `
+        <div class=\"email-quick-row\" onclick=\"mailOpen('${String(e.id).replace(/'/g,"\\'")}')\">
+          <div class=\"email-quick-dot ${String(e.flags || []).includes('Seen') ? 'read' : ''}\"></div>
+          <div class=\"email-quick-subject\">${escapeHtml(e.subject || '(sans objet)')}</div>
+          <div class=\"email-quick-sender\">${escapeHtml(e.from || '')}</div>
+        </div>
+      `).join('') || '<div class="empty-state"><p>Aucun email</p></div>';
+    } catch (e) {
+      console.warn('Dashboard emails load failed:', e);
+    }
+  }
+
+  // ─── Full mail page (Gmail × Apple Mail — complete) ───
+  let mailAllEmails = [];
+  let mailSelectedId = null;
+  let mailCurrentFolder = 'INBOX';
+  let mailFolders = [];
+  let mailSelectedIds = new Set(); // for bulk actions
+
+  // Color hash for avatars
+  const AV_COLORS = ['#8B7355','#7A8B6F','#C67B5C','#6B8E9B','#9B6B8E','#8E9B6B','#6B9B8E','#B8836B','#8E6B9B','#6BB88E'];
+  function avColor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+    return AV_COLORS[Math.abs(h) % AV_COLORS.length];
+  }
+
+  async function mailLoadFolders() {
+    try {
+      const data = await api('/api/himalaya/folders');
+      mailFolders = (data.folders || []).map(f => typeof f === 'string' ? {name: f} : f);
+      // Populate folder select
+      const sel = document.getElementById('mail-folder-select');
+      if (sel) {
+        const prev = sel.value;
+        sel.innerHTML = mailFolders.map(f => {
+          const label = f.name.replace('[Gmail]/', '').replace(' Mail', '');
+          return `<option value="${escapeHtml(f.name)}">${escapeHtml(label)}</option>`;
+        }).join('');
+        if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  async function mailRefresh() {
+    const listPane = document.getElementById('mail-list-inner');
+    if (listPane) listPane.innerHTML = '<div class="mail-list-loading">Chargement…</div>';
+    mailSelectedIds.clear();
+    mailUpdateBulkBar();
+
+    try {
+      const data = await api(`/api/himalaya/envelopes?limit=200&folder=${encodeURIComponent(mailCurrentFolder)}`);
+      const envelopes = data.envelopes || [];
+      mailAllEmails = envelopes.map((e) => ({
+        id: String(e.id),
+        sender: e.from || '',
+        subject: e.subject || '(sans objet)',
+        is_read: (e.flags || []).includes('Seen'),
+        is_flagged: (e.flags || []).includes('Flagged'),
+        flags: e.flags || [],
+        received_at: e.date || '',
+      }));
+      mailRenderList(mailAllEmails);
+      document.getElementById('mail-count-label').textContent = `${mailAllEmails.length} message${mailAllEmails.length !== 1 ? 's' : ''}`;
+
+      // Dashboard sync
+      if (mailCurrentFolder === 'INBOX') {
+        dashboardEmails = mailAllEmails;
+        const unread = mailAllEmails.filter(e => !e.is_read).length;
+        setText('quick-total', mailAllEmails.length);
+        setText('quick-unread', unread);
+        setText('stat-emails', mailAllEmails.length);
+        setText('stat-unread', unread);
+        const emailBadge = document.getElementById('email-count');
+        if (emailBadge) emailBadge.textContent = unread;
+      }
+    } catch (e) {
+      if (listPane) listPane.innerHTML = `<div class="mail-list-empty"><p>Erreur: ${escapeHtml(e.message)}</p></div>`;
+    }
+  }
+
+  function mailRenderList(list) {
+    const container = document.getElementById('mail-list-inner');
+    if (!container) return;
+    if (!list || list.length === 0) {
+      container.innerHTML = `<div class="mail-list-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+        <p>Aucun message dans ce dossier</p>
+      </div>`;
+      return;
+    }
+
+    container.innerHTML = list.map((e) => {
+      const senderRaw = e.sender || '';
+      const senderName = senderRaw.split('<')[0].trim() || senderRaw;
+      const initial = senderName.charAt(0).toUpperCase() || '?';
+      const color = avColor(senderName);
+      const unreadClass = e.is_read ? '' : ' unread';
+      const activeClass = e.id === mailSelectedId ? ' active' : '';
+      const time = e.received_at ? formatDate(e.received_at) : '';
+      const starred = e.is_flagged;
+      const checked = mailSelectedIds.has(e.id);
+
+      return `<div class="mail-row${unreadClass}${activeClass}" data-id="${escapeHtml(e.id)}">
+        <label class="mail-row-check" onclick="event.stopPropagation()">
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="mailToggleSelect('${escapeHtml(e.id)}',this.checked)">
+          <span class="mail-check-box"></span>
+        </label>
+        <button class="mail-star-btn${starred ? ' starred' : ''}" onclick="event.stopPropagation();mailToggleStar('${escapeHtml(e.id)}',this)" title="Marquer comme favori">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="${starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+        <div class="mail-row-avatar" style="background:${color};" onclick="mailOpen('${escapeHtml(e.id)}',this.closest('.mail-row'))">${initial}</div>
+        <div class="mail-row-body" onclick="mailOpen('${escapeHtml(e.id)}',this.closest('.mail-row'))">
+          <div class="mail-row-top">
+            <div class="mail-row-from">${escapeHtml(senderName)}</div>
+            <div class="mail-row-time">${time}</div>
+          </div>
+          <div class="mail-row-subject">${escapeHtml(e.subject)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ─── Selection / Bulk ───
+  function mailToggleSelect(id, checked) {
+    if (checked) mailSelectedIds.add(id); else mailSelectedIds.delete(id);
+    mailUpdateBulkBar();
+  }
+
+  function mailSelectAll() {
+    const allChecked = mailSelectedIds.size === mailAllEmails.length;
+    if (allChecked) { mailSelectedIds.clear(); } else { mailAllEmails.forEach(e => mailSelectedIds.add(e.id)); }
+    mailRenderList(mailAllEmails);
+    mailUpdateBulkBar();
+  }
+
+  function mailUpdateBulkBar() {
+    const bar = document.getElementById('mail-bulk-bar');
+    const count = mailSelectedIds.size;
+    if (bar) bar.style.display = count > 0 ? 'flex' : 'none';
+    const countEl = document.getElementById('mail-bulk-count');
+    if (countEl) countEl.textContent = `${count} sélectionné${count > 1 ? 's' : ''}`;
+    // Update check-all checkbox
+    const checkAll = document.getElementById('mail-check-all');
+    if (checkAll) { checkAll.checked = count > 0 && count === mailAllEmails.length; }
+  }
+
+  // ─── Star/Flag ───
+  async function mailToggleStar(id, btn) {
+    const e = mailAllEmails.find(x => x.id === id);
+    if (!e) return;
+    const action = e.is_flagged ? 'remove' : 'add';
+    try {
+      await api(`/api/himalaya/message/${id}/flag/${action}`, { method: 'POST', body: JSON.stringify({ flags: ['Flagged'] }) });
+      e.is_flagged = !e.is_flagged;
+      if (btn) btn.classList.toggle('starred', e.is_flagged);
+      const svg = btn ? btn.querySelector('svg') : null;
+      if (svg) svg.setAttribute('fill', e.is_flagged ? 'currentColor' : 'none');
+    } catch (err) { toast('Erreur: ' + err.message, 'error'); }
+  }
+
+  // ─── Mark read/unread ───
+  async function mailMarkRead(id, read) {
+    const action = read ? 'add' : 'remove';
+    try {
+      await api(`/api/himalaya/message/${id}/flag/${action}`, { method: 'POST', body: JSON.stringify({ flags: ['Seen'] }) });
+      const e = mailAllEmails.find(x => x.id === id);
+      if (e) e.is_read = read;
+      mailRenderList(mailAllEmails);
+    } catch (err) { toast('Erreur: ' + err.message, 'error'); }
+  }
+
+  async function mailMarkReadSelected(read) {
+    for (const id of mailSelectedIds) {
+      try { await api(`/api/himalaya/message/${id}/flag/${read ? 'add' : 'remove'}`, { method: 'POST', body: JSON.stringify({ flags: ['Seen'] }) }); } catch (e) {}
+    }
+    mailSelectedIds.clear();
+    mailRefresh();
+  }
+
+  // ─── Delete ───
+  async function mailDelete(id) {
+    if (!confirm('Supprimer ce message ?')) return;
+    try {
+      await api(`/api/himalaya/message/${id}/delete`, { method: 'POST' });
+      toast('Message supprimé', 'success');
+      mailBackToList();
+      mailRefresh();
+    } catch (err) { toast('Erreur: ' + err.message, 'error'); }
+  }
+
+  async function mailDeleteSelected() {
+    if (!confirm(`Supprimer ${mailSelectedIds.size} message(s) ?`)) return;
+    for (const id of mailSelectedIds) {
+      try { await api(`/api/himalaya/message/${id}/delete`, { method: 'POST' }); } catch (e) {}
+    }
+    mailSelectedIds.clear();
+    toast('Messages supprimés', 'success');
+    mailRefresh();
+  }
+
+  // ─── Archive (move to All Mail) ───
+  async function mailArchive(id) {
+    try {
+      await api(`/api/himalaya/message/${id}/move`, { method: 'POST', body: JSON.stringify({ folder: '[Gmail]/All Mail' }) });
+      toast('Message archivé', 'success');
+      mailBackToList();
+      mailRefresh();
+    } catch (err) { toast('Erreur: ' + err.message, 'error'); }
+  }
+
+  async function mailArchiveSelected() {
+    for (const id of mailSelectedIds) {
+      try { await api(`/api/himalaya/message/${id}/move`, { method: 'POST', body: JSON.stringify({ folder: '[Gmail]/All Mail' }) }); } catch (e) {}
+    }
+    mailSelectedIds.clear();
+    toast('Messages archivés', 'success');
+    mailRefresh();
+  }
+
+  // ─── Move to folder ───
+  async function mailMoveTo(folder) {
+    const ids = mailSelectedIds.size > 0 ? [...mailSelectedIds] : mailSelectedId ? [mailSelectedId] : [];
+    if (ids.length === 0) return;
+    const label = folder.replace('[Gmail]/', '');
+    for (const id of ids) {
+      try { await api(`/api/himalaya/message/${id}/move`, { method: 'POST', body: JSON.stringify({ folder }) }); } catch (e) {}
+    }
+    toast(`Déplacé${ids.length > 1 ? 's' : ''} vers ${label}`, 'success');
+    mailSelectedIds.clear();
+    mailBackToList();
+    mailRefresh();
+  }
+
+  // ─── Open message ───
+  async function mailOpen(id, rowEl) {
+    mailSelectedId = id;
+    document.querySelectorAll('.mail-row').forEach(r => r.classList.remove('active'));
+    if (rowEl) rowEl.classList.add('active');
+
+    // Mark as read
+    const env = mailAllEmails.find(e => e.id === id);
+    if (env && !env.is_read) {
+      env.is_read = true;
+      if (rowEl) rowEl.classList.remove('unread');
+      api(`/api/himalaya/message/${id}/flag/add`, { method: 'POST', body: JSON.stringify({ flags: ['Seen'] }) }).catch(() => {});
+    }
+
+    const detailPane = document.getElementById('mail-detail-pane');
+    const backBtn = document.getElementById('mail-btn-back-list');
+    detailPane.innerHTML = '<div class="mail-list-loading">Chargement…</div>';
+
+    if (window.innerWidth <= 1024) {
+      detailPane.classList.add('mobile-show');
+      if (backBtn) backBtn.style.display = 'flex';
+    }
+
+    try {
+      const data = await api(`/api/himalaya/message/${encodeURIComponent(id)}`);
+      const body = data.body || '(pas de contenu)';
+      const envelope = mailAllEmails.find(e => e.id === id) || {};
+      const from = data.from || envelope.sender || '';
+      const senderName = from.split('<')[0].trim() || from;
+      const senderEmail = (from.match(/<(.+)>/) || [])[1] || '';
+      const subject = data.subject || envelope.subject || '(sans objet)';
+      const date = data.date ? formatDate(data.date) : (envelope.received_at ? formatDate(envelope.received_at) : '');
+      const initial = senderName.charAt(0).toUpperCase() || '?';
+      const color = avColor(senderName);
+      const isFlagged = envelope.is_flagged;
+      const moveOptions = mailFolders.filter(f => f.name !== mailCurrentFolder).map(f =>
+        `<button class="mail-action-dropdown-item" onclick="mailMoveTo('${escapeHtml(f.name)}')">${escapeHtml(f.name.replace('[Gmail]/',''))}</button>`
+      ).join('');
+
+      detailPane.innerHTML = `
+        <div class="mail-detail-toolbar">
+          <button class="mail-tb-btn" onclick="mailArchive('${escapeHtml(id)}')" title="Archiver">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8"/><polyline points="1 3 23 3"/><path d="M10 12h4"/></svg>
+          </button>
+          <button class="mail-tb-btn" onclick="mailDelete('${escapeHtml(id)}')" title="Supprimer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </button>
+          <button class="mail-tb-btn${isFlagged ? ' active-star' : ''}" onclick="mailToggleStar('${escapeHtml(id)}',null);mailOpen('${escapeHtml(id)}',document.querySelector('.mail-row.active'))" title="Favori">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFlagged ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+          <span class="mail-toolbar-sep"></span>
+          <button class="mail-tb-btn" onclick="mailMarkRead('${escapeHtml(id)}',false)" title="Marquer comme non lu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+          </button>
+          <div class="mail-action-dropdown-wrap">
+            <button class="mail-tb-btn" title="Déplacer vers…" onclick="this.nextElementSibling.classList.toggle('show')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </button>
+            <div class="mail-action-dropdown">${moveOptions}</div>
+          </div>
+          <span class="mail-toolbar-sep"></span>
+          <button class="mail-tb-btn" onclick="mailReply('${escapeHtml(id)}')" title="Répondre">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
+          </button>
+          <button class="mail-tb-btn" onclick="mailForward('${escapeHtml(id)}')" title="Transférer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 014-4h12"/></svg>
+          </button>
+          <span class="mail-toolbar-sep"></span>
+          <button class="mail-tb-btn" onclick="mailAiSuggest('${escapeHtml(id)}')" title="Suggérer réponse IA">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </button>
+        </div>
+        <div class="mail-detail-header">
+          <div class="mail-detail-subject">${escapeHtml(subject)}</div>
+          <div class="mail-detail-from-row">
+            <div class="mail-detail-avatar" style="background:${color};">${initial}</div>
+            <div class="mail-detail-sender-info">
+              <div class="mail-detail-sender">${escapeHtml(senderName)}</div>
+              ${senderEmail ? `<div class="mail-detail-email-addr">${escapeHtml(senderEmail)}</div>` : ''}
+            </div>
+            <div class="mail-detail-date">${date}</div>
+          </div>
+        </div>
+        <div class="mail-detail-body">${escapeHtml(body)}</div>
+        <div class="mail-ai-suggest" id="mail-ai-suggest">
+          <div class="mail-ai-suggest-label">Réponse suggérée</div>
+          <div id="mail-ai-suggest-text"></div>
+        </div>`;
+    } catch (e) {
+      detailPane.innerHTML = `<div style="padding:2rem;color:var(--error);">Erreur: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+
+  // ─── Reply / Forward ───
+  function mailReply(id) {
+    const env = mailAllEmails.find(e => e.id === id) || {};
+    const sender = env.sender || '';
+    const email = (sender.match(/<(.+)>/) || [])[1] || sender;
+    const subject = env.subject || '';
+    const replySubject = subject.startsWith('Re:') ? subject : `Re: ${subject}`;
+    mailCompose();
+    document.getElementById('compose-to').value = email;
+    document.getElementById('compose-subject').value = replySubject;
+    document.getElementById('compose-body').value = '';
+    document.getElementById('compose-body').focus();
+  }
+
+  function mailForward(id) {
+    const env = mailAllEmails.find(e => e.id === id) || {};
+    const subject = env.subject || '';
+    const fwdSubject = subject.startsWith('Fwd:') ? subject : `Fwd: ${subject}`;
+    mailCompose();
+    document.getElementById('compose-to').value = '';
+    document.getElementById('compose-subject').value = fwdSubject;
+    document.getElementById('compose-body').value = `\n\n---------- Message transféré ----------\nDe: ${env.sender || ''}\nObjet: ${env.subject || ''}\n`;
+    document.getElementById('compose-to').focus();
+  }
+
+  // ─── AI Suggest ───
+  async function mailAiSuggest(id) {
+    const suggestEl = document.getElementById('mail-ai-suggest');
+    const textEl = document.getElementById('mail-ai-suggest-text');
+    if (!suggestEl || !textEl) return;
+    textEl.textContent = 'Génération en cours…';
+    suggestEl.classList.add('show');
+    try {
+      const data = await api(`/api/email/${id}/ai-response`, { method: 'POST' });
+      textEl.textContent = data.response || '(aucune suggestion)';
+    } catch (e) {
+      textEl.textContent = 'Erreur: ' + e.message;
+    }
+  }
+
+  // ─── Back to list ───
+  function mailBackToList() {
+    const detailPane = document.getElementById('mail-detail-pane');
+    const backBtn = document.getElementById('mail-btn-back-list');
+    detailPane.classList.remove('mobile-show');
+    if (backBtn) backBtn.style.display = 'none';
+    mailSelectedId = null;
+    document.querySelectorAll('.mail-row').forEach(r => r.classList.remove('active'));
+    detailPane.innerHTML = `<div class="mail-detail-empty">
+      <div class="mail-detail-empty-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+      </div>
+      <p class="mail-detail-empty-text">Sélectionnez un message</p>
+    </div>`;
+  }
+
+  // ─── Search / Filter ───
+  function mailFilter() {
+    const q = (document.getElementById('mail-search-input').value || '').toLowerCase().trim();
+    const clearBtn = document.getElementById('mail-search-clear');
+    if (clearBtn) clearBtn.style.display = q ? 'flex' : 'none';
+    if (!q) { mailRenderList(mailAllEmails); return; }
+    const filtered = mailAllEmails.filter(e =>
+      ((e.subject || '') + ' ' + (e.sender || '')).toLowerCase().includes(q)
+    );
+    mailRenderList(filtered);
+  }
+
+  function mailClearSearch() {
+    const input = document.getElementById('mail-search-input');
+    if (input) input.value = '';
+    document.getElementById('mail-search-clear').style.display = 'none';
+    mailRenderList(mailAllEmails);
+  }
+
+  function mailSwitchFolder() {
+    mailCurrentFolder = document.getElementById('mail-folder-select').value;
+    mailSelectedId = null;
+    mailRefresh();
+  }
+
+  // ─── Compose ───
+  function mailCompose() {
+    document.getElementById('mail-compose-overlay').classList.add('open');
+  }
+  function mailComposeClose() {
+    document.getElementById('mail-compose-overlay').classList.remove('open');
+    document.getElementById('compose-to').value = '';
+    document.getElementById('compose-subject').value = '';
+    document.getElementById('compose-body').value = '';
+  }
+  async function mailComposeSend() {
+    const to = document.getElementById('compose-to').value.trim();
+    const subject = document.getElementById('compose-subject').value.trim();
+    const body = document.getElementById('compose-body').value.trim();
+    if (!to) { toast('Destinataire requis', 'error'); return; }
+    toast('Envoi en cours…', 'info');
+    try {
+      await api('/api/himalaya/send', { method: 'POST', body: JSON.stringify({ to, subject, body }) });
+      toast('Message envoyé', 'success');
+      mailComposeClose();
+    } catch (e) { toast('Erreur: ' + e.message, 'error'); }
+  }
+
+  function filterDashboardEmails() {}
+
+  // ─── Auto-process panel ───
+  async function mailAutoToggle() {
+    const panel = document.getElementById('mail-auto-panel');
+    const show = panel.style.display === 'none';
+    panel.style.display = show ? 'block' : 'none';
+    if (show) await mailAutoLoad();
+  }
+
+  async function mailAutoLoad() {
+    try {
+      const cfg = await api('/api/himalaya/auto/config');
+      document.getElementById('auto-enabled').checked = cfg.enabled;
+      document.getElementById('auto-sort').checked = cfg.auto_sort;
+      document.getElementById('auto-reply').checked = cfg.auto_reply_draft;
+    } catch (e) {
+      document.getElementById('mail-auto-result').textContent = 'Erreur: ' + e.message;
+    }
+  }
+
+  async function mailAutoSave() {
+    try {
+      const cfg = await api('/api/himalaya/auto/config');
+      cfg.enabled = document.getElementById('auto-enabled').checked;
+      cfg.auto_sort = document.getElementById('auto-sort').checked;
+      cfg.auto_reply_draft = document.getElementById('auto-reply').checked;
+      await api('/api/himalaya/auto/config', { method: 'POST', body: JSON.stringify(cfg) });
+      toast('Config sauvegardée', 'success');
+    } catch (e) {
+      toast('Erreur: ' + e.message, 'error');
+    }
+  }
+
+  async function mailAutoProcessNow() {
+    const resultEl = document.getElementById('mail-auto-result');
+    resultEl.textContent = 'Traitement en cours…';
+    try {
+      const r = await api('/api/himalaya/auto/process', { method: 'POST' });
+      resultEl.innerHTML = `<strong>${r.processed}</strong> traités, <strong>${r.sorted}</strong> triés, <strong>${r.replied}</strong> brouillons`;
+      if (r.actions && r.actions.length > 0) {
+        resultEl.innerHTML += '<br>' + r.actions.map(a => `• <em>${escapeHtml(a.subject || a.id)}</em>: ${escapeHtml(a.detail)}`).join('<br>');
+      }
+      mailRefresh();
+    } catch (e) {
+      resultEl.textContent = 'Erreur: ' + e.message;
+    }
+  }
+
+  async function mailAutoViewLog() {
+    const logEl = document.getElementById('mail-auto-log');
+    logEl.style.display = logEl.style.display === 'none' ? 'block' : 'none';
+    if (logEl.style.display === 'block') {
+      try {
+        const data = await api('/api/himalaya/auto/log?limit=20');
+        const logs = data.log || [];
+        if (logs.length === 0) { logEl.textContent = 'Aucune action enregistrée'; return; }
+        logEl.innerHTML = logs.map(l =>
+          `<div><strong>${l.ts?.substring(11,19) || ''}</strong> ${escapeHtml(l.action)} ${l.category ? '[' + escapeHtml(l.category) + ']' : ''} ${l.detail ? escapeHtml(l.detail.substring(0,80)) : ''}</div>`
+        ).join('');
+      } catch (e) { logEl.textContent = 'Erreur: ' + e.message; }
+    }
+  }
+
+  // ─── Utilities ───
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function formatSize(bytes) {
+    if (!bytes) return '0 o';
+    if (bytes < 1024) return bytes + ' o';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' Ko';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' Mo';
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    // Handle himalaya format: "2026-06-04 17:00+00:00"
+    let d;
+    if (typeof iso === 'string' && iso.includes('-') && !iso.startsWith('1')) {
+      // ISO-like string — try to normalize
+      const normalized = iso.replace(' ', 'T').replace(/\+(\d{2}):(\d{2})/, '+$1$2');
+      d = new Date(normalized);
+      if (isNaN(d.getTime())) d = new Date(iso);
+    } else {
+      d = new Date(typeof iso === 'number' ? iso * 1000 : iso);
+    }
+    if (isNaN(d.getTime())) return '';
+    
+    const now = new Date();
+    const diff = now - d;
+    
+    if (diff < 60000) return "À l'instant";
+    if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)}min`;
+    if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)}h`;
+    if (diff < 172800000) return 'Hier';
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ─── HERMES AGENT ──────────────────────────────────────
+
+  // State
+  let hermesChatMessages = [];
+
+  async function hermesApi(url) {
+    try {
+      const resp = await fetch(API_BASE + '/api/hermes' + url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      return await resp.json();
+    } catch (e) {
+      console.warn('Hermes API error:', url, e);
+      return { error: e.message };
+    }
+  }
+
+  // ─── Overview ───
+  async function loadHermesOverview() {
+    const status = await hermesApi('/status');
+    
+    if (status.error) {
+      document.getElementById('hermes-stat-sessions').textContent = '—';
+      document.getElementById('hermes-stat-total').textContent = '—';
+      document.getElementById('hermes-stat-cost').textContent = '—';
+      document.getElementById('hermes-stat-tokens').textContent = '—';
+      document.getElementById('hermes-recent-sessions').innerHTML = '<div class="empty-state"><p>Gateway injoignable</p></div>';
+      document.getElementById('hermes-gateway-status').innerHTML = '<div class="hermes-health-item"><span class="hermes-health-label">Gateway</span><span class="hermes-health-value err">Hors ligne</span></div>';
+      return;
+    }
+    
+    const stats = status.stats || {};
+    
+    document.getElementById('hermes-stat-sessions').textContent = stats.active_sessions ?? '—';
+    document.getElementById('hermes-stat-total').textContent = stats.total_sessions ?? '—';
+    
+    const costEl = document.getElementById('hermes-stat-cost');
+    const cost = stats.total_cost_usd;
+    costEl.textContent = cost != null ? cost.toFixed(4) + '$' : '—';
+    
+    const tokensEl = document.getElementById('hermes-stat-tokens');
+    const tokens = stats.total_tokens;
+    tokensEl.textContent = tokens != null ? formatNumber(tokens) : '—';
+    
+    // Recent sessions
+    const sessions = status.recent_sessions || [];
+    const sessContainer = document.getElementById('hermes-recent-sessions');
+    if (sessions.length === 0) {
+      sessContainer.innerHTML = '<div class="empty-state"><p>Aucune session récente</p></div>';
+    } else {
+      sessContainer.innerHTML = sessions.map(s => `
+        <div class="hermes-session-item" onclick="hermesOpenSession('${escapeHtml(s.id)}')">
+          <div class="hermes-session-icon ${s.source || 'cli'}">${(s.source || 'cli')[0].toUpperCase()}</div>
+          <div class="hermes-session-info">
+            <div class="hermes-session-title ${s.preview ? '' : 'no-title'}">${escapeHtml(s.preview || '(session vide)')}</div>
+            <div class="hermes-session-meta">
+              <span>${s.source || '—'}</span>
+              <span>${s.messages || 0} msg</span>
+              ${s.cost ? '<span class="hermes-session-cost">' + s.cost.toFixed(4) + '$</span>' : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // Gateway status
+    const gw = status.gateway || {};
+    document.getElementById('hermes-gateway-status').innerHTML = `
+      <div class="hermes-health-item">
+        <span class="hermes-health-label">Status</span>
+        <span class="hermes-health-value ${gw.status === 'ok' ? 'ok' : 'warn'}">${gw.status || 'inconnu'}</span>
+      </div>
+      <div class="hermes-health-item">
+        <span class="hermes-health-label">Plateforme</span>
+        <span class="hermes-health-value">${gw.platform || '—'}</span>
+      </div>
+      <div class="hermes-health-item">
+        <span class="hermes-health-label">Sessions totales</span>
+        <span class="hermes-health-value">${stats.total_sessions || 0}</span>
+      </div>
+      <div class="hermes-health-item">
+        <span class="hermes-health-label">Par source</span>
+        <span class="hermes-health-value">${stats.by_source ? Object.entries(stats.by_source).map(([k,v]) => k + ':' + v).join(', ') : '—'}</span>
+      </div>
+    `;
+  }
+
+  // ─── Chat ───
+  function hermesCheckStatus() {
+    const dot = document.getElementById('hermes-chat-dot');
+    const text = document.getElementById('hermes-chat-status-text');
+    hermesApi('/health').then(data => {
+      if (data.status === 'ok') {
+        dot.className = 'hermes-chat-dot online';
+        text.textContent = 'En ligne — Hermes prêt';
+      } else {
+        dot.className = 'hermes-chat-dot offline';
+        text.textContent = 'Hors ligne';
+      }
+    }).catch(() => {
+      dot.className = 'hermes-chat-dot offline';
+      text.textContent = 'Hors ligne';
+    });
+  }
+
+  async function hermesSendMessage() {
+    const input = document.getElementById('hermes-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    input.value = '';
+    const messagesContainer = document.getElementById('hermes-chat-messages');
+    
+    // Remove welcome
+    const welcome = messagesContainer.querySelector('.hermes-chat-welcome');
+    if (welcome) welcome.remove();
+    
+    // Add user message
+    addChatMessage('user', text);
+    hermesChatMessages.push({ role: 'user', content: text });
+    
+    // Add loading indicator
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'hermes-msg hermes-msg-assistant';
+    loadingEl.id = 'hermes-chat-loading';
+    loadingEl.innerHTML = `
+      <div class="hermes-msg-avatar">H</div>
+      <div>
+        <div class="hermes-msg-loading"><span></span><span></span><span></span></div>
+      </div>`;
+    messagesContainer.appendChild(loadingEl);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    try {
+      const resp = await fetch(API_BASE + '/api/hermes/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: hermesChatMessages.map(m => ({ role: m.role, content: m.content }))
+        }),
+      });
+      
+      const loading = document.getElementById('hermes-chat-loading');
+      if (loading) loading.remove();
+      
+      if (resp.ok) {
+        const data = await resp.json();
+        let reply = data.response || data.content || data.message || JSON.stringify(data);
+        addChatMessage('assistant', reply);
+        hermesChatMessages.push({ role: 'assistant', content: reply });
+      } else {
+        addChatMessage('assistant', '⚠️ Erreur: ' + (await resp.text()));
+      }
+    } catch (e) {
+      const loading = document.getElementById('hermes-chat-loading');
+      if (loading) loading.remove();
+      addChatMessage('assistant', '⚠️ Erreur de connexion: ' + e.message);
+    }
+    
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  function addChatMessage(role, text) {
+    const container = document.getElementById('hermes-chat-messages');
+    const el = document.createElement('div');
+    el.className = `hermes-msg hermes-msg-${role}`;
+    
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    
+    el.innerHTML = `
+      <div class="hermes-msg-avatar">${role === 'user' ? 'V' : 'H'}</div>
+      <div>
+        <div class="hermes-msg-bubble">${escapeHtml(text)}</div>
+        <div class="hermes-msg-time">${timeStr}</div>
+      </div>`;
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function hermesNewChat() {
+    hermesChatMessages = [];
+    const container = document.getElementById('hermes-chat-messages');
+    container.innerHTML = `
+      <div class="hermes-chat-welcome">
+        <div class="hermes-chat-logo">H</div>
+        <p>Nouvelle conversation Hermes</p>
+        <p class="hermes-chat-hint">Posez votre première question.</p>
+      </div>`;
+  }
+
+  // ─── Sessions ───
+  let hermesAllSessions = [];
+
+  async function hermesLoadSessions() {
+    const data = await hermesApi('/sessions?limit=100');
+    hermesAllSessions = data.data || [];
+    document.getElementById('hermes-sessions-search').value = '';
+    hermesRenderSessions(hermesAllSessions);
+  }
+
+  function hermesRenderSessions(sessions) {
+    const container = document.getElementById('hermes-sessions-list');
+    if (!sessions || sessions.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Aucune session trouvée</p></div>';
+      return;
+    }
+    
+    container.innerHTML = sessions.map(s => {
+      const title = s.title || s.preview || '';
+      const isActive = !s.ended_at;
+      const date = s.started_at ? new Date(s.started_at * 1000) : new Date();
+      const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+      const cost = s.estimated_cost_usd;
+      
+      return `
+        <div class="hermes-session-item" onclick="hermesOpenSession('${escapeHtml(s.id)}')">
+          <div class="hermes-session-icon ${s.source || 'cli'}" title="${isActive ? 'Active' : 'Terminée'}">
+            ${(s.source || '?')[0].toUpperCase()}
+          </div>
+          <div class="hermes-session-info">
+            <div class="hermes-session-title ${title ? '' : 'no-title'}">${escapeHtml(title || '(sans titre)')}</div>
+            <div class="hermes-session-meta">
+              <span>${s.source || '—'}</span>
+              <span>${s.message_count || 0} messages</span>
+              <span>${dateStr}</span>
+              ${cost ? '<span class="hermes-session-cost">' + cost.toFixed(4) + '$</span>' : ''}
+              <span>${s.model || '—'}</span>
+              ${isActive ? '<span style="color:var(--sage);font-weight:600;">● actif</span>' : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function hermesFilterSessions() {
+    const q = document.getElementById('hermes-sessions-search').value.toLowerCase().trim();
+    if (!q) {
+      hermesRenderSessions(hermesAllSessions);
+      return;
+    }
+    const filtered = hermesAllSessions.filter(s => {
+      const haystack = [s.id, s.source, s.model, s.title, s.preview].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+    hermesRenderSessions(filtered);
+  }
+
+  async function hermesOpenSession(sessionId) {
+    const modal = document.getElementById('hermes-session-modal');
+    document.getElementById('hermes-modal-title').textContent = 'Session ' + sessionId.substring(0, 20) + '…';
+    modal.classList.add('open');
+    
+    const data = await hermesApi('/sessions/' + encodeURIComponent(sessionId) + '/messages?limit=100');
+    const msgsContainer = document.getElementById('hermes-session-messages');
+    
+    const messages = data.data || data.messages || [];
+    if (messages.length === 0) {
+      msgsContainer.innerHTML = '<div class="empty-state"><p>Aucun message dans cette session</p></div>';
+      return;
+    }
+    
+    msgsContainer.innerHTML = messages.filter(m => m.role !== 'system').map(m => {
+      let content = typeof m.content === 'string' ? m.content : 
+        (m.content && typeof m.content === 'object' ? JSON.stringify(m.content) : '(contenu complexe)');
+      
+      // Truncate tool output
+      if (m.role === 'tool' && content.length > 500) {
+        content = content.substring(0, 500) + '…\n[tronqué]';
+      }
+      
+      return `
+        <div class="hermes-session-msg ${m.role || 'user'}">
+          <div class="hermes-session-msg-role ${m.role || 'user'}">${m.role || 'user'}</div>
+          <div class="hermes-session-msg-text">${escapeHtml(content)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function hermesCloseSessionModal() {
+    document.getElementById('hermes-session-modal').classList.remove('open');
+  }
+
+  // ─── Skills ───
+  async function hermesLoadSkills() {
+    const data = await hermesApi('/skills');
+    const skills = data.skills || [];
+    const container = document.getElementById('hermes-skills-list');
+    
+    if (skills.length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>Aucune skill installée</p></div>';
+      return;
+    }
+    
+    // Group by category
+    const groups = {};
+    skills.forEach(s => {
+      const parts = s.path.split('/');
+      const cat = parts.length > 1 ? parts[0] : 'autres';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(s);
+    });
+    
+    container.innerHTML = Object.entries(groups).map(([cat, items]) => `
+      <div style="margin-bottom:1rem;">
+        <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-light);font-weight:600;padding:0.5rem 0.75rem;">${escapeHtml(cat)} (${items.length})</div>
+        ${items.map(s => `
+          <div class="hermes-skill-item" onclick="hermesViewSkill('${escapeHtml(s.path)}')">
+            <div class="hermes-skill-icon">${s.name[0].toUpperCase()}</div>
+            <div class="hermes-skill-info">
+              <div class="hermes-skill-name">${escapeHtml(s.name.replace(/-/g, ' '))}</div>
+              <div class="hermes-skill-path">${escapeHtml(s.path)}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  function hermesViewSkill(path) {
+    toast(`Skills: ${path} — utilisez le terminal Hermes pour voir le contenu`, 'info');
+  }
+
+  // ─── System ───
+  async function hermesLoadSystem() {
+    const data = await hermesApi('/status');
+    
+    // Health card
+    const healthEl = document.getElementById('hermes-sys-health');
+    if (data.error) {
+      healthEl.innerHTML = '<div class="hermes-health-item"><span class="hermes-health-label">Gateway</span><span class="hermes-health-value err">Injoignable</span></div>';
+    } else {
+      const gw = data.gateway || {};
+      const stats = data.stats || {};
+      healthEl.innerHTML = `
+        <div class="hermes-health-item">
+          <span class="hermes-health-label">Gateway</span>
+          <span class="hermes-health-value ${gw.status === 'ok' ? 'ok' : 'warn'}">${gw.status || '—'}</span>
+        </div>
+        <div class="hermes-health-item">
+          <span class="hermes-health-label">Plateforme</span>
+          <span class="hermes-health-value">${gw.platform || '—'}</span>
+        </div>
+        <div class="hermes-health-item">
+          <span class="hermes-health-label">Sessions</span>
+          <span class="hermes-health-value">${stats.total_sessions || 0} total (${stats.active_sessions || 0} actives)</span>
+        </div>
+        <div class="hermes-health-item">
+          <span class="hermes-health-label">Coût estimé</span>
+          <span class="hermes-health-value">${(stats.total_cost_usd || 0).toFixed(4)}$</span>
+        </div>
+        <div class="hermes-health-item">
+          <span class="hermes-health-label">Tokens</span>
+          <span class="hermes-health-value">${formatNumber(stats.total_tokens || 0)}</span>
+        </div>
+      `;
+    }
+    
+    // Distribution
+    const distEl = document.getElementById('hermes-sys-distribution');
+    if (data.error || !data.stats) {
+      distEl.innerHTML = '<div class="empty-state"><p>Aucune donnée</p></div>';
+    } else {
+      const bySource = stats.by_source || {};
+      const sources = Object.entries(bySource);
+      const total = sources.reduce((sum, [,v]) => sum + v, 0) || 1;
+      const colors = { telegram: '#5C9BDE', cli: '#2C2824', cron: '#6B8E9B', api_server: '#A08B6D', default: '#C4A882' };
+      
+      if (sources.length === 0) {
+        distEl.innerHTML = '<div class="empty-state"><p>Aucune session</p></div>';
+      } else {
+        distEl.innerHTML = sources.map(([src, count]) => {
+          const pct = Math.round((count / total) * 100);
+          return `
+            <div class="hermes-source-bar">
+              <span class="hermes-source-label">${escapeHtml(src)}</span>
+              <div class="hermes-source-track">
+                <div class="hermes-source-fill" style="width:${pct}%;background:${colors[src] || colors.default};"></div>
+              </div>
+              <span class="hermes-source-count">${count}</span>
+            </div>`;
+        }).join('');
+      }
+    }
+  }
+
+  // ─── Format helpers ───
+  function formatNumber(n) {
+    if (n == null) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return n.toString();
+  }
+
+  // ─── Expose to global scope for onclick handlers ───
+  window.switchPage = switchPage;
+  window.toggleSidebar = toggleSidebar;
+  window.browseWeb = browseWeb;
+  window.fetchEmails = mailRefresh;
+  window.fetchEmails = mailRefresh;
+  window.mailRefresh = mailRefresh;
+  window.mailOpen = mailOpen;
+  window.mailBackToList = mailBackToList;
+  window.mailFilter = mailFilter;
+  window.mailSwitchFolder = mailSwitchFolder;
+  window.mailAiSuggest = mailAiSuggest;
+  window.mailClearSearch = mailClearSearch;
+  window.mailCompose = mailCompose;
+  window.mailComposeClose = mailComposeClose;
+  window.mailComposeSend = mailComposeSend;
+  window.mailToggleStar = mailToggleStar;
+  window.mailMarkRead = mailMarkRead;
+  window.mailMarkReadSelected = mailMarkReadSelected;
+  window.mailDelete = mailDelete;
+  window.mailDeleteSelected = mailDeleteSelected;
+  window.mailArchive = mailArchive;
+  window.mailArchiveSelected = mailArchiveSelected;
+  window.mailMoveTo = mailMoveTo;
+  window.mailReply = mailReply;
+  window.mailForward = mailForward;
+  window.mailToggleSelect = mailToggleSelect;
+  window.mailSelectAll = mailSelectAll;
+  window.mailLoadFolders = mailLoadFolders;
+  window.mailAutoToggle = mailAutoToggle;
+  window.mailAutoLoad = mailAutoLoad;
+  window.mailAutoSave = mailAutoSave;
+  window.mailAutoProcessNow = mailAutoProcessNow;
+  window.mailAutoViewLog = mailAutoViewLog;
+  window.filterDashboardEmails = filterDashboardEmails;
+  // Hermes exports
+  window.hermesSendMessage = hermesSendMessage;
+  window.hermesNewChat = hermesNewChat;
+  window.hermesLoadSessions = hermesLoadSessions;
+  window.hermesOpenSession = hermesOpenSession;
+  window.hermesCloseSessionModal = hermesCloseSessionModal;
+  window.hermesFilterSessions = hermesFilterSessions;
+  window.hermesLoadSkills = hermesLoadSkills;
+
+})();

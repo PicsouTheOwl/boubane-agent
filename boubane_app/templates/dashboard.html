@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Boubane — Agent IA Local</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css?v=49">
+<link rel="stylesheet" href="/static/css/mail.css?v=49">
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Mobile menu button -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="logo-text">boubane<span class="logo-dot">.</span></span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-title">Agent</div>
+        <button class="nav-item active" data-page="dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Tableau de bord
+        </button>
+        <button class="nav-item" data-page="agent-chat">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Chat Agent
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">Outils</div>
+        <button class="nav-item" data-page="emails">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+          Emails
+          <span class="nav-badge" id="nav-email-badge">0</span>
+        </button>
+        <button class="nav-item" data-page="auto-reply">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Réponses auto
+        </button>
+        <button class="nav-item" data-page="files">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Fichiers
+          <span class="nav-badge" id="nav-file-badge">0</span>
+        </button>
+        <button class="nav-item" data-page="calendar">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Calendrier
+          <span class="nav-badge" id="nav-cal-badge" style="display:none">0</span>
+        </button>
+        <button class="nav-item" data-page="kanban">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Kanban
+        </button>
+        <button class="nav-item" data-page="web">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Web
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">Business</div>
+        <button class="nav-item" data-page="business">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Vue d'ensemble
+        </button>
+        <button class="nav-item" data-page="clients">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Clients
+        </button>
+        <button class="nav-item" data-page="site">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Site web
+        </button>
+        <button class="nav-item" data-page="agents">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Agents IA
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">Système</div>
+        <button class="nav-item" data-page="activity">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Activité
+        </button>
+        <button class="nav-item" data-page="settings">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Configuration
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <div class="status-dot" id="sidebar-status-dot"></div>
+        <span id="sidebar-status-text">En ligne</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD ─── -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-header-left">
+          <button class="btn btn-ghost btn-sm dashboard-menu-btn" onclick="toggleSidebar()" style="margin-right:8px;padding:6px 10px;display:none">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <h1>Bonjour, Leo</h1>
+            <p class="page-subtitle">Votre agent IA local est prêt.</p>
+          </div>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="switchPage('agent-chat')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Discuter avec l'agent
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stats-grid">
+        <div class="stat-card clickable" onclick="go('emails')">
+          <div class="stat-icon stat-icon--email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+          </div>
+          <div class="stat-value" id="stat-emails">—</div>
+          <div class="stat-label">Emails</div>
+          <div class="stat-sub" id="stat-unread-label">— non lus</div>
+        </div>
+        <div class="stat-card clickable" onclick="go('files')">
+          <div class="stat-icon stat-icon--files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="stat-value" id="stat-files">—</div>
+          <div class="stat-label">Fichiers</div>
+          <div class="stat-sub">analysés</div>
+        </div>
+        <div class="stat-card clickable" onclick="go('web')">
+          <div class="stat-icon stat-icon--web">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-web">—</div>
+          <div class="stat-label">Pages web</div>
+          <div class="stat-sub">visitées</div>
+        </div>
+        <div class="stat-card clickable" onclick="go('activity')">
+          <div class="stat-icon stat-icon--activity">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-value" id="stat-actions">—</div>
+          <div class="stat-label">Actions</div>
+          <div class="stat-sub">aujourd'hui</div>
+        </div>
+      </div>
+
+      <!-- Content grid -->
+      <div class="dashboard-grid">
+        <!-- Emails -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px;vertical-align:text-bottom"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+              Derniers emails
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('emails')">Boîte mail</button>
+          </div>
+          <div id="dash-email-list">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px;vertical-align:text-bottom"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Activité récente
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('activity')">Tout voir</button>
+          </div>
+          <div class="activity-list" id="dash-activity-list">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Files -->
+      <div class="card" style="margin-top:1.25rem">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px;vertical-align:text-bottom"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Fichiers récents
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="switchPage('files')">Tous les fichiers</button>
+        </div>
+        <div class="file-list" id="dash-file-list">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── AGENT CHAT ─── -->
+    <section class="page" id="page-agent-chat">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Chat Agent</h1>
+          <p class="page-subtitle">Discutez avec votre agent IA — mails, fichiers, organisation.</p>
+        </div>
+      </div>
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome">
+            <div class="chat-welcome-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <h3>Bonjour, je suis Boubane</h3>
+            <p>Je peux gérer vos mails, analyser vos fichiers, naviguer le web, et organiser votre travail.</p>
+            <div class="chat-suggestions">
+              <button class="chip" onclick="chatSend('Résume-moi mes derniers emails')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+                Résumer mes emails
+              </button>
+              <button class="chip" onclick="chatSend('Organise mes fichiers sur le VPS')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+                Organiser mes fichiers
+              </button>
+              <button class="chip" onclick="chatSend('Qu\'est-ce qui est important aujourd\'hui ?')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Ce qui est important
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-input-wrap">
+            <textarea id="chat-input" placeholder="Demandez quelque chose à votre agent…" rows="1" onkeydown="chatKeyDown(event)" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+            <button class="chat-send" onclick="chatSend()" title="Envoyer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── EMAILS ─── -->
+    <section class="page page-fullbleed" id="page-emails">
+      <!-- Toolbar Desktop -->
+      <div class="mail-toolbar mail-toolbar-desktop">
+        <div class="mail-toolbar-left">
+          <button class="mail-action-btn mail-compose-btn" onclick="mailCompose()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Nouveau
+          </button>
+          <label class="mail-check-all" onclick="event.stopPropagation()">
+            <input type="checkbox" id="mail-check-all" onchange="mailSelectAll()">
+            <span class="mail-check-box"></span>
+          </label>
+          <select id="mail-folder-select" class="mail-folder-select" onchange="mailSwitchFolder()">
+            <option value="INBOX">Boîte de réception</option>
+          </select>
+          <span class="mail-count-label" id="mail-count-label">0 messages</span>
+          <div class="mail-bulk-bar" id="mail-bulk-bar" style="display:none">
+            <span class="mail-bulk-count" id="mail-bulk-count">0</span>
+            <button class="mail-tb-btn" onclick="mailArchiveSelected()" title="Archiver la sélection"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></button>
+            <button class="mail-tb-btn" onclick="mailDeleteSelected()" title="Supprimer la sélection"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+          </div>
+        </div>
+        <div class="mail-toolbar-right">
+          <div class="mail-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="mail-search-input" placeholder="Rechercher… (Ctrl+K)" oninput="mailFilter()">
+            <button class="mail-search-clear" id="mail-search-clear" onclick="mailClearSearch()" style="display:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <button class="mail-tb-btn" onclick="mailRefresh()" title="Actualiser (F5)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Toolbar Mobile -->
+      <div class="mail-toolbar mail-toolbar-mobile">
+        <!-- Ligne 1 : Retour + Recherche pleine largeur + Refresh -->
+        <div class="mail-mobile-row1">
+          <button class="mail-tb-btn mail-back-btn-mobile" onclick="go('dashboard')" title="Retour">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="mail-search mail-search-mobile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="mail-search-input-mobile" placeholder="Rechercher…" oninput="mailFilter()">
+            <button class="mail-search-clear" id="mail-search-clear-mobile" onclick="mailClearSearch()" style="display:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <button class="mail-tb-btn" onclick="mailRefresh()" title="Actualiser (F5)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          </button>
+        </div>
+        <!-- Ligne 2 : Filtres chips + Tri -->
+        <div class="mail-mobile-row2">
+          <div class="mail-filter-chips">
+            <button class="mail-chip active" data-filter="all" onclick="mailSetFilter('all')">Tous</button>
+            <button class="mail-chip" data-filter="unread" onclick="mailSetFilter('unread')">Non lus</button>
+            <button class="mail-chip" data-filter="starred" onclick="mailSetFilter('starred')">Favoris</button>
+            <button class="mail-chip" data-filter="ai" onclick="mailSetFilter('ai')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
+              IA
+            </button>
+          </div>
+          <div class="mail-sort-wrap">
+            <button class="mail-tb-btn mail-sort-btn" onclick="mailToggleSort()" title="Trier">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><polyline points="15 8 12 5 9 8"/><polyline points="9 16 12 19 15 16"/></svg>
+              <span id="mail-sort-label">Date</span>
+            </button>
+            <div class="mail-sort-dropdown" id="mail-sort-dropdown">
+              <button class="mail-sort-option active" data-sort="date-desc" onclick="mailSetSort('date-desc')">Plus récent</button>
+              <button class="mail-sort-option" data-sort="date-asc" onclick="mailSetSort('date-asc')">Plus ancien</button>
+              <button class="mail-sort-option" data-sort="unread" onclick="mailSetSort('unread')">Non lus d'abord</button>
+              <button class="mail-sort-option" data-sort="starred" onclick="mailSetSort('starred')">Favoris d'abord</button>
+              <button class="mail-sort-option" data-sort="sender" onclick="mailSetSort('sender')">Expéditeur A-Z</button>
+              <button class="mail-sort-option" data-sort="ai-priority" onclick="mailSetSort('ai-priority')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
+                Priorité IA
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Ligne 3 : Dossier select + Nouveau (desktop-only actions) -->
+        <div class="mail-mobile-row3">
+          <select id="mail-folder-select-mobile" class="mail-folder-select" onchange="mailSwitchFolder()">
+            <option value="INBOX">Boîte de réception</option>
+          </select>
+          <span class="mail-count-label" id="mail-count-label-mobile">0 messages</span>
+          <button class="mail-action-btn mail-compose-btn" onclick="mailCompose()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Nouveau
+          </button>
+        </div>
+        <!-- Bulk bar mobile -->
+        <div class="mail-bulk-bar" id="mail-bulk-bar-mobile" style="display:none">
+          <span class="mail-bulk-count" id="mail-bulk-count-mobile">0</span>
+          <button class="mail-tb-btn" onclick="mailArchiveSelected()" title="Archiver"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Archiver</button>
+          <button class="mail-tb-btn" onclick="mailDeleteSelected()" title="Supprimer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Supprimer</button>
+        </div>
+      </div>
+      <div class="mail-layout">
+        <div class="mail-list-pane" id="mail-list-pane">
+          <div class="mail-pull-indicator" id="mail-pull-indicator">
+            <div class="spinner"></div>
+            <span>Actualisation…</span>
+          </div>
+          <div class="mail-list-inner" id="mail-list-inner"></div>
+        </div>
+        <div class="mail-detail-pane" id="mail-detail-pane">
+          <div class="mail-detail-empty">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M22 7l-10 7L2 7"/></svg>
+            <p>Sélectionnez un message</p>
+            <p style="font-size:0.75rem;margin-top:0.5rem;color:var(--text-muted)">R — répondre · E — archiver · Del — supprimer</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compose modal -->
+      <div class="mail-compose-overlay" id="mail-compose-overlay">
+        <div class="mail-compose">
+          <div class="mail-compose-header">
+            <span>Nouveau message</span>
+            <button class="mail-compose-close" onclick="mailComposeClose()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="mail-compose-fields">
+            <div class="mail-compose-field"><label>À</label><input type="email" id="compose-to" placeholder="destinataire@email.com"></div>
+            <div class="mail-compose-field"><label>Objet</label><input type="text" id="compose-subject" placeholder="Objet du message"></div>
+          </div>
+          <textarea class="mail-compose-body" id="compose-body" placeholder="Écrire le message... (Ctrl+Enter pour envoyer)"></textarea>
+          <div class="mail-compose-footer">
+            <button class="mail-reply-btn mail-reply-btn-primary" onclick="mailComposeSend()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Envoyer
+            </button>
+            <button class="mail-reply-btn mail-reply-btn-secondary" onclick="mailComposeClose()">Fermer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── FILES ─── -->
+    <section class="page" id="page-files">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Fichiers</h1>
+          <p class="page-subtitle">Uploadez, visualisez et analysez vos documents.</p>
+        </div>
+        <div class="page-header-right">
+          <div style="position:relative;display:inline-block">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="file-search-input" placeholder="Rechercher…" oninput="fileFilter()" style="padding-left:28px;padding-right:8px;height:32px;border:1px solid var(--border);border-radius:6px;background:var(--bg-elevated);color:var(--text);font-size:0.78rem;width:180px">
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div class="upload-text">Déposez vos fichiers ici</div>
+          <div class="upload-hint">ou cliquez — PDF, DOCX, XLSX, CSV, TXT, images</div>
+        </div>
+        <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp,.zip,.rar,.7z" style="display:none">
+      </div>
+      <!-- File viewer overlay -->
+      <div class="file-viewer" id="file-viewer" style="display:none">
+        <div class="file-viewer-header">
+          <button class="btn btn-ghost btn-sm" onclick="fileViewerClose()">&larr; Retour</button>
+          <span id="file-viewer-name" style="font-size:0.85rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px">—</span>
+          <div style="flex:1"></div>
+          <span id="file-viewer-type" class="badge" style="font-size:0.65rem">—</span>
+          <span id="file-viewer-size" style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">—</span>
+        </div>
+        <div class="file-viewer-body" id="file-viewer-body">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <div id="file-list-container">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Fichiers analysés</div>
+            <div style="display:flex;gap:0.3rem;flex-wrap:wrap">
+              <button class="btn btn-sm btn-ghost file-filter-btn active" data-filter="all" onclick="fileSetFilter('all')">Tous</button>
+              <button class="btn btn-sm btn-ghost file-filter-btn" data-filter="pdf" onclick="fileSetFilter('pdf')">PDF</button>
+              <button class="btn btn-sm btn-ghost file-filter-btn" data-filter="docx" onclick="fileSetFilter('docx')">DOCX</button>
+              <button class="btn btn-sm btn-ghost file-filter-btn" data-filter="xlsx" onclick="fileSetFilter('xlsx')">XLSX</button>
+              <button class="btn btn-sm btn-ghost file-filter-btn" data-filter="image" onclick="fileSetFilter('image')">Images</button>
+              <button class="btn btn-sm btn-ghost file-filter-btn" data-filter="txt" onclick="fileSetFilter('txt')">Texte</button>
+            </div>
+          </div>
+          <div class="file-list" id="file-list">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── WEB ─── -->
+    <section class="page" id="page-web">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Navigation web</h1>
+          <p class="page-subtitle">Boubane navigue pour vous et extrait les informations clés.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="form-group">
+          <label class="form-label">URL à visiter</label>
+          <div class="form-row">
+            <input type="url" class="form-input" id="web-url" placeholder="https://exemple.com" style="flex:1">
+            <select class="form-input" id="web-task-type" style="width:150px">
+              <option value="scrape">Extraire</option>
+              <option value="summarize">Résumer</option>
+              <option value="extract_links">Liens</option>
+            </select>
+            <button class="btn btn-primary" onclick="browseWeb()">Visiter</button>
+          </div>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Résultat</div></div>
+          <div class="web-result" id="web-result">Entrez une URL ci-dessus</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Historique</div></div>
+          <div class="activity-list" id="web-history">
+            <div class="empty-state"><p>Aucune page visitée</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ACTIVITY ─── -->
+    <section class="page" id="page-activity">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Activité</h1>
+          <p class="page-subtitle">Historique complet des actions de votre agent.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Journal d'activité</div></div>
+        <div class="activity-list" id="full-activity-list">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CALENDAR ─── -->
+    <section class="page" id="page-calendar">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Calendrier</h1>
+          <p class="page-subtitle">Gérez vos rendez-vous et synchronisez vos agendas.</p>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="calOpenModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nouveau RDV
+          </button>
+        </div>
+      </div>
+      <div class="stats-grid" id="cal-stats">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--activity">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="stat-value" id="cal-today-count">—</div>
+          <div class="stat-label">Aujourd'hui</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="stat-value" id="cal-week-count">—</div>
+          <div class="stat-label">Cette semaine</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--web">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="stat-value" id="cal-accounts-count">—</div>
+          <div class="stat-label">Comptes connectés</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="calShowAccounts()">
+          <div class="stat-icon stat-icon--files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </div>
+          <div class="stat-value">⚙️</div>
+          <div class="stat-label">Connecter un agenda</div>
+        </div>
+      </div>
+      <!-- Calendar view -->
+      <div class="dashboard-grid" style="margin-top:1.25rem">
+        <div class="card" style="grid-column:1/-1">
+          <div class="card-header">
+            <div class="card-title">Prochains événements</div>
+            <div style="display:flex;gap:0.4rem">
+              <button class="btn btn-sm btn-ghost" onclick="calPrevWeek()">←</button>
+              <span style="font-size:0.78rem;color:var(--text-muted)" id="cal-week-label">—</span>
+              <button class="btn btn-sm btn-ghost" onclick="calNextWeek()">→</button>
+            </div>
+          </div>
+          <div id="cal-events-list" style="min-height:200px">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Event modal -->
+      <div class="mail-compose-overlay" id="cal-modal">
+        <div class="mail-compose" style="width:520px">
+          <div class="mail-compose-header">
+            <span id="cal-modal-title">Nouveau rendez-vous</span>
+            <button class="mail-compose-close" onclick="calCloseModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="mail-compose-fields">
+            <div class="mail-compose-field"><label>Titre</label><input type="text" id="cal-title" placeholder="Réunion équipe"></div>
+            <div class="mail-compose-field"><label>Date début</label><input type="datetime-local" id="cal-start"></div>
+            <div class="mail-compose-field"><label>Date fin</label><input type="datetime-local" id="cal-end"></div>
+            <div class="mail-compose-field"><label>Lieu</label><input type="text" id="cal-location" placeholder="Bureau / Zoom / Google Meet"></div>
+            <div class="mail-compose-field"><label>Description</label><textarea id="cal-desc" style="width:100%;border:none;background:none;font-size:0.82rem;color:var(--text);font-family:inherit;outline:none;resize:none;min-height:60px"></textarea></div>
+          </div>
+          <div class="mail-compose-footer">
+            <button class="btn btn-primary btn-sm" onclick="calSave()">Enregistrer</button>
+            <button class="btn btn-ghost btn-sm" onclick="calCloseModal()">Annuler</button>
+          </div>
+        </div>
+      </div>
+      <!-- Accounts modal -->
+      <div class="mail-compose-overlay" id="cal-accounts-modal">
+        <div class="mail-compose" style="width:520px">
+          <div class="mail-compose-header">
+            <span>Connecter un agenda</span>
+            <button class="mail-compose-close" onclick="calCloseAccountsModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div style="padding:1rem">
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem">Connectez vos agendas pour synchroniser vos événements automatiquement.</p>
+            <div style="display:flex;flex-direction:column;gap:0.5rem">
+              <button class="btn btn-secondary" onclick="toast('Google Calendar — configuration bientôt')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                Google Calendar
+              </button>
+              <button class="btn btn-secondary" onclick="toast('Apple Calendar (iCloud) — configuration bientôt')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                Apple Calendar (iCloud)
+              </button>
+              <button class="btn btn-secondary" onclick="toast('Outlook / Microsoft 365 — configuration bientôt')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 000 20 14.5 14.5 0 000-20"/><path d="M2 12h20"/></svg>
+                Outlook / Microsoft 365
+              </button>
+              <button class="btn btn-secondary" onclick="toast('CalDAV (Fastmail, Nextcloud, etc.) — configuration bientôt')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+                CalDAV (Fastmail, Nextcloud...)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── AUTO REPLY / EMAIL AUTOMATION ─── -->
+    <section class="page" id="page-auto-reply">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Réponses automatiques</h1>
+          <p class="page-subtitle">Configurez le tri IA et les brouillons automatiques pour vos emails.</p>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="triggerAutoProcess()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Traiter maintenant
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:1.25rem">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="stat-value" id="auto-stat-processed">—</div>
+          <div class="stat-label">Emails traités</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </div>
+          <div class="stat-value" id="auto-stat-drafts">—</div>
+          <div class="stat-label">Brouillons générés</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--web">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8"/><polyline points="1 3 23 3"/><path d="M10 12h4"/></svg>
+          </div>
+          <div class="stat-value" id="auto-stat-sorted">—</div>
+          <div class="stat-label">Triés automatiquement</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="triggerAutoProcess()">
+          <div class="stat-icon stat-icon--activity">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-value">▶</div>
+          <div class="stat-label">Lancer le traitement</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Config -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Configuration</div>
+            <button class="btn btn-sm btn-primary" onclick="saveAutoConfig()">Sauvegarder</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;padding:0.5rem 0">
+            <!-- Toggle: Enable -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:0.8rem;font-weight:500;color:var(--text)">Activer le traitement auto</div>
+                <div style="font-size:0.68rem;color:var(--text-muted)">Trie et répond automatiquement aux nouveaux emails</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="auto-enabled" checked><span class="toggle-slider"></span></label>
+            </div>
+            <!-- Toggle: Auto-sort -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:0.8rem;font-weight:500;color:var(--text)">Tri automatique</div>
+                <div style="font-size:0.68rem;color:var(--text-muted)">Classer par catégorie et déplacer dans les dossiers</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="auto-sort" checked><span class="toggle-slider"></span></label>
+            </div>
+            <!-- Toggle: Auto-reply draft -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:0.8rem;font-weight:500;color:var(--text)">Brouillons automatiques</div>
+                <div style="font-size:0.68rem;color:var(--text-muted)">Générer un brouillon de réponse IA pour chaque email</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="auto-reply-draft" checked><span class="toggle-slider"></span></label>
+            </div>
+            <!-- Poll interval -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:0.8rem;font-weight:500;color:var(--text)">Intervalle de vérification</div>
+                <div style="font-size:0.68rem;color:var(--text-muted)">Fréquence de traitement automatique</div>
+              </div>
+              <select id="auto-poll-interval" class="form-input" style="width:100px;padding:0.3rem;font-size:0.75rem">
+                <option value="1">1 min</option>
+                <option value="5" selected>5 min</option>
+                <option value="10">10 min</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60">1 heure</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Règles de tri</div>
+            <button class="btn btn-sm btn-secondary" onclick="addAutoRule()">+ Ajouter une règle</button>
+          </div>
+          <div id="auto-rules-list" style="min-height:100px">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="card" style="margin-top:1.25rem">
+        <div class="card-header">
+          <div class="card-title">Journal d'activité</div>
+          <button class="btn btn-sm btn-ghost" onclick="loadAutoLog()">Actualiser</button>
+        </div>
+        <div id="auto-log-list" style="min-height:150px">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── BUSINESS OVERVIEW ─── -->
+    <section class="page" id="page-business">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Business</h1>
+          <p class="page-subtitle">Vue d'ensemble de votre activité Boubane.</p>
+        </div>
+      </div>
+      <!-- KPI Cards -->
+      <div class="stats-grid" id="biz-kpi-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-value" id="biz-clients">—</div>
+          <div class="stat-label">Clients actifs</div>
+          <div class="stat-sub" id="biz-trial">— essai</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--files">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div class="stat-value" id="biz-mrr">—</div>
+          <div class="stat-label">MRR / mois</div>
+          <div class="stat-sub" id="biz-arr">— / an</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--web">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+          </div>
+          <div class="stat-value" id="biz-site-status">—</div>
+          <div class="stat-label">Site web</div>
+          <div class="stat-sub" id="biz-site-uptime">— uptime</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--activity">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-value" id="biz-churned">—</div>
+          <div class="stat-label">Churned</div>
+          <div class="stat-sub">clients perdus</div>
+        </div>
+      </div>
+      <!-- Detail grid -->
+      <div class="dashboard-grid" style="margin-top:1.25rem">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Répartition par plan</div>
+          </div>
+          <div id="biz-plans">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Derniers clients</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchPage('clients')">Tous</button>
+          </div>
+          <div id="biz-recent-clients">
+            <div class="loading-row"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CLIENTS ─── -->
+    <section class="page" id="page-clients">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Clients</h1>
+          <p class="page-subtitle">Gérez vos abonnés et leurs abonnements.</p>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="clientOpenModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter un client
+          </button>
+        </div>
+      </div>
+      <!-- Filters -->
+      <div class="card" style="margin-bottom:1rem;padding:0.75rem 1rem">
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+          <span style="font-size:0.78rem;color:var(--text-muted)">Filtrer :</span>
+          <button class="btn btn-sm btn-secondary biz-filter active" data-filter="all" onclick="clientFilter('all',this)">Tous</button>
+          <button class="btn btn-sm btn-ghost biz-filter" data-filter="active" onclick="clientFilter('active',this)">Actifs</button>
+          <button class="btn btn-sm btn-ghost biz-filter" data-filter="trial" onclick="clientFilter('trial',this)">Essai</button>
+          <button class="btn btn-sm btn-ghost biz-filter" data-filter="churned" onclick="clientFilter('churned',this)">Churned</button>
+        </div>
+      </div>
+      <div class="card">
+        <div id="clients-list">
+          <div class="loading-row"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <!-- Client modal -->
+      <div class="mail-compose-overlay" id="client-modal">
+        <div class="mail-compose" style="width:480px">
+          <div class="mail-compose-header">
+            <span id="client-modal-title">Nouveau client</span>
+            <button class="mail-compose-close" onclick="clientCloseModal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="mail-compose-fields">
+            <div class="mail-compose-field"><label>Nom</label><input type="text" id="client-name" placeholder="Jean Dupont"></div>
+            <div class="mail-compose-field"><label>Email</label><input type="email" id="client-email" placeholder="jean@entreprise.com"></div>
+            <div class="mail-compose-field"><label>Entreprise</label><input type="text" id="client-company" placeholder="ACME Corp"></div>
+            <div class="mail-compose-field"><label>Plan</label>
+              <select id="client-plan" style="flex:1;border:none;background:none;font-size:0.82rem;color:var(--text);font-family:inherit;outline:none">
+                <option value="starter">Starter</option>
+                <option value="pro">Pro</option>
+                <option value="enterprise">Enterprise</option>
+              </select>
+            </div>
+            <div class="mail-compose-field"><label>Status</label>
+              <select id="client-status" style="flex:1;border:none;background:none;font-size:0.82rem;color:var(--text);font-family:inherit;outline:none">
+                <option value="trial">Essai</option>
+                <option value="active">Actif</option>
+                <option value="paused">En pause</option>
+                <option value="churned">Churned</option>
+              </select>
+            </div>
+            <div class="mail-compose-field"><label>MRR (€)</label><input type="number" id="client-mrr" placeholder="0" min="0" step="0.01"></div>
+            <div class="mail-compose-field"><label>Notes</label><input type="text" id="client-notes" placeholder="Notes internes..."></div>
+          </div>
+          <div class="mail-compose-footer">
+            <button class="btn btn-primary btn-sm" onclick="clientSave()">Enregistrer</button>
+            <button class="btn btn-ghost btn-sm" onclick="clientCloseModal()">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SITE WEB ─── -->
+    <section class="page" id="page-site">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Site web</h1>
+          <p class="page-subtitle">Supervision et gestion du site Boubane.</p>
+        </div>
+        <div class="page-header-right">
+          <a href="https://boubane.vercel.app/" target="_blank" class="btn btn-ghost btn-sm" style="margin-right:0.5rem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Voir le site
+          </a>
+          <button class="btn btn-secondary" onclick="siteCheck()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Vérifier
+          </button>
+        </div>
+      </div>
+      <!-- Strapi CMS Admin -->
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-right:6px;vertical-align:text-bottom"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            CMS — Gérer le contenu
+          </div>
+          <div style="display:flex;gap:0.4rem;align-items:center">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--green)" id="cms-status-dot"></div>
+            <span style="font-size:0.72rem;color:var(--text-muted)" id="cms-status-text">En ligne</span>
+            <a href="http://145.241.175.52/cms/admin" target="_blank" class="btn btn-ghost btn-sm" style="margin-left:0.5rem">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Ouvrir
+            </a>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border)">
+          <iframe id="cms-iframe" src="http://145.241.175.52/cms/admin" style="width:100%;height:calc(100vh - 220px);border:none;display:block" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── AGENTS IA ─── -->
+    <section class="page" id="page-agents">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Agents IA</h1>
+          <p class="page-subtitle">Gérez les agents IA qui alimentent votre business.</p>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Agent principal</div></div>
+          <div id="agent-primary">
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+              <div style="width:48px;height:48px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:0.95rem">Hermes</div>
+                <div style="font-size:0.75rem;color:var(--text-muted)">Agent IA — Boubane</div>
+              </div>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:0.35rem">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div>
+                <span style="font-size:0.72rem;color:var(--green)">Actif</span>
+              </div>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);line-height:1.5">
+              Hermes est l'agent IA principal de Boubane. Il gère les emails, les fichiers, la navigation web et les réponses automatiques.
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:0.4rem">
+              <button class="btn btn-ghost btn-sm" onclick="switchPage('agent-chat')">Tester</button>
+              <button class="btn btn-ghost btn-sm" onclick="toast('Configuration bientôt disponible')">Configurer</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Ajouter un agent</div>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem">
+            Connectez un nouvel agent IA (Claude, GPT-4, Gemini, etc.) pour remplacer ou compléter Hermes.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.4rem">
+            <button class="btn btn-secondary btn-sm" onclick="toast('Anthropic Claude — bientôt')">+ Anthropic Claude</button>
+            <button class="btn btn-secondary btn-sm" onclick="toast('OpenAI GPT-4 — bientôt')">+ OpenAI GPT-4</button>
+            <button class="btn btn-secondary btn-sm" onclick="toast('Google Gemini — bientôt')">+ Google Gemini</button>
+            <button class="btn btn-secondary btn-sm" onclick="toast('Mistral — bientôt')">+ Mistral AI</button>
+            <button class="btn btn-secondary btn-sm" onclick="toast('Ollama local — bientôt')">+ Ollama (local)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SETTINGS ─── -->
+    <section class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Configuration</h1>
+          <p class="page-subtitle">Paramètres de votre agent Boubane.</p>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Agent</div></div>
+          <div id="agent-status"><p style="color:var(--text-muted);font-size:0.85rem">Chargement…</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Boîte mail</div></div>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Gérée via Himalaya CLI (IMAP/SMTP).</p>
+          <button class="btn btn-secondary" onclick="switchPage('emails')">Ouvrir la messagerie</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ KANBAN ═══ -->
+    <section class="page" id="page-kanban">
+      <div class="page-header">
+        <h1 class="page-title">Tableau Kanban</h1>
+        <p class="page-subtitle">Tâches créées depuis vos mails ou manuellement</p>
+      </div>
+      <div class="kanban-board" id="kanban-board"></div>
+    </section>
+
+  </main>
+</div>
+
+
+<script src="/static/js/app.js?v=49"></script>
+</body>
+</html>
