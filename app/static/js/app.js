@@ -26,10 +26,56 @@
     mail.listEl  = document.getElementById('mail-list-inner');
     mail.detailEl = document.getElementById('mail-detail-pane');
     initNav(); initUpload(); initKeyboard();
+    updateGreeting();
     loadStats(); loadActivity(); loadDashEmails(); loadFiles();
     setInterval(loadStats, 30000);
     setInterval(loadActivity, 60000);
+    setInterval(updateGreeting, 60000);
+    // Restore theme preference
+    const savedTheme = localStorage.getItem('boubane_theme');
+    if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    updateThemeIcon();
   });
+
+  // ─── Theme toggle ───
+  window.toggleTheme = function() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('boubane_theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('boubane_theme', 'light');
+    }
+    updateThemeIcon();
+  };
+  function updateThemeIcon() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const icon = $('theme-icon');
+    if (!icon) return;
+    // Sun icon for dark mode (click to go light), moon icon for light mode (click to go dark)
+    icon.innerHTML = isLight
+      ? '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>' // moon
+      : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'; // sun
+  }
+
+  // ─── Dynamic greeting ───
+  function updateGreeting() {
+    const h = new Date().getHours();
+    const greeting = h < 6 ? 'Bonne nuit' : h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
+    const el = $('dash-greeting');
+    if (el) el.textContent = `${greeting}, Leo`;
+    const sub = $('dash-subtitle');
+    if (sub) {
+      const msgs = [
+        'Votre agent IA local est prêt.',
+        'Tout fonctionne parfaitement.',
+        'Comment puis-je vous aider ?',
+        'Vos emails sont synchronisés.',
+      ];
+      sub.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+    }
+  }
 
   /* ═══════════════════════════════════════════
      UTILS

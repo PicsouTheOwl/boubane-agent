@@ -778,3 +778,25 @@ body:has(.mail-detail-pane.mobile-show) .mobile-menu-btn {
   85% { opacity: 1; transform: translateX(-50%) translateY(0); }
   100% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
 }
+
+/* ─── Light Theme ─── */
+[data-theme="light"] {
+  --bg:           #f5f3f0;
+  --bg-surface:   #ffffff;
+  --bg-surface-2: #faf8f5;
+  --bg-surface-3: #f0ede8;
+  --bg-hover:     #e8e5e0;
+  --bg-active:    #ddd9d2;
+  --border:       #d8d4cc;
+  --border-light: #c8c4bc;
+  --border-focus: #a8a49c;
+  --text:           #2c2825;
+  --text-secondary: #6a6460;
+  --text-muted:     #8a847c;
+  --text-disabled:  #b0aaa0;
+  --accent:         #b8845a;
+  --accent-hover:   #a07048;
+  --accent-glow:    rgba(184,132,90,0.08);
+  --accent-glow-2:  rgba(184,132,90,0.15);
+  --accent-border:  rgba(184,132,90,0.25);
+}
