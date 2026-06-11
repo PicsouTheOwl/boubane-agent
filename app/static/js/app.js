@@ -256,25 +256,20 @@
   async function loadStats() {
     try {
       const s = await api('/api/agent/stats').catch(() => null);
-      if (s && $('stat-files'))    $('stat-files').textContent = s?.files?.total ?? 0;
-      if (s && $('stat-web'))     $('stat-web').textContent = s?.web?.total ?? 0;
-      if (s && $('stat-actions')) $('stat-actions').textContent = s?.total_actions ?? 0;
-      const fb = $('nav-file-badge');
-      if (fb && s) fb.textContent = s?.files?.total ?? 0;
-    } catch(e) {}
-
-    try {
-      const em = await api(`${MH}/envelopes?limit=50&folder=INBOX`);
-      const envs = em.envelopes || [];
-      const unread = envs.filter(e => !(e.flags||[]).includes('Seen')).length;
-      if ($('stat-emails')) $('stat-emails').textContent = envs.length;
-      const ul = $('stat-unread-label');
-      if (ul) ul.textContent = `${unread} non lus`;
-      const nb = $('nav-email-badge');
-      if (nb) { nb.textContent = unread; nb.style.display = unread > 0 ? 'inline' : 'none'; }
-      // Update document title with unread count
-      if (unread > 0) document.title = `(${unread}) Boubane — Agent IA`;
-      else document.title = 'Boubane — Agent IA';
+      if (s) {
+        if ($('stat-files'))    $('stat-files').textContent = s?.files?.total ?? 0;
+        if ($('stat-web'))     $('stat-web').textContent = s?.web?.total ?? 0;
+        if ($('stat-emails'))  $('stat-emails').textContent = s?.emails?.total ?? 0;
+        if ($('stat-actions')) $('stat-actions').textContent = s?.total_actions ?? 0;
+        const fb = $('nav-file-badge');
+        if (fb) fb.textContent = s?.files?.total ?? 0;
+        const ul = $('stat-unread-label');
+        if (ul) ul.textContent = `${s?.emails?.unread ?? 0} non lus`;
+        const nb = $('nav-email-badge');
+        if (nb) { nb.textContent = s?.emails?.unread ?? 0; nb.style.display = (s?.emails?.unread ?? 0) > 0 ? 'inline' : 'none'; }
+        if ((s?.emails?.unread ?? 0) > 0) document.title = `(${s.emails.unread}) Boubane — Agent IA`;
+        else document.title = 'Boubane — Agent IA';
+      }
     } catch(e) {}
   }
 
@@ -495,7 +490,7 @@
         flags: e.flags||[], date: e.date||''
       }));
       mailLoadOffset = mail.all.length;
-      mailLoadTotal = parseInt(d.total || mail.all.length);
+      mailLoadTotal = parseInt(d.total) || mail.all.length;
       mailApplyFilters();
       const l = $('mail-count-label');
       if (l) l.textContent = `${mail.filtered.length} / ${mailLoadTotal} msg`;
@@ -513,7 +508,7 @@
             flags: e.flags||[], date: e.date||''
           }));
           mailLoadOffset = mail.all.length;
-          mailLoadTotal = parseInt(d2.total || mail.all.length);
+          mailLoadTotal = parseInt(d2.total) || mail.all.length;
           mailApplyFilters();
           const l2 = $('mail-count-label');
           if (l2) l2.textContent = `${mail.filtered.length} / ${mailLoadTotal} msg`;

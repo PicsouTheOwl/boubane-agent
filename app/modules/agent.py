@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc
+import logging
 from datetime import datetime, timedelta
 
 from app.modules.database import get_db
@@ -27,14 +28,20 @@ async def get_stats(db: AsyncSession = Depends(get_db)):
     )
     web_done_count = web_done.scalar()
     
-    # Email stats
-    email_count = await db.execute(select(func.count(EmailRecord.id)))
-    email_total = email_count.scalar()
-    
-    unread = await db.execute(
-        select(func.count(EmailRecord.id)).where(EmailRecord.is_read == False)
-    )
-    unread_count = unread.scalar()
+    # Email stats from Himalaya (run subprocess in executor to not block async loop)
+    email_total = 0
+    unread_count = 0
+    try:
+        import asyncio, logging
+        from app.modules.himalaya_mail import _run, _as_json, _parse_envelopes
+        loop = asyncio.get_event_loop()
+        stdout = await loop.run_in_executor(None, lambda: _run(["envelope", "list", "--folder", "INBOX", "--page", "1", "--page-size", "200", "--output", "json"], timeout=20))
+        data = _as_json(stdout)
+        items = data if isinstance(data, list) else _parse_envelopes(stdout)
+        email_total = len(items)
+        unread_count = sum(1 for e in items if "Seen" not in (e.get("flags") or []))
+    except Exception as _e:
+        logging.warning(f"Stats email error: {_e}")
     
     # Recent activity
     recent_logs = await db.execute(
