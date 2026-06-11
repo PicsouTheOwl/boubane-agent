@@ -628,12 +628,13 @@ body:has(.mail-detail-pane.mobile-show) .mobile-menu-btn {
   .main-content { margin-left:0; padding:var(--space-md); padding-top:calc(var(--header-h) + var(--space-sm)); max-width:100%; }
   .stats-grid { grid-template-columns:repeat(2,1fr); gap:var(--space-sm); }
   .dashboard-grid { grid-template-columns:1fr; gap:var(--space-md); }
-  /* No burger button - navigation done via sidebar swipe or back buttons */
-  .mobile-menu-btn { display:none !important; }
-  .sidebar-overlay { display:none !important; }
+  /* Burger menu visible on mobile */
+  .mobile-menu-btn { display:flex !important; }
+  .sidebar-overlay { display:none; }
+  .sidebar-overlay.show { display:block; }
   .card { padding:var(--space-md); }
   .page-header { margin-bottom:var(--space-md); }
-  .dashboard-menu-btn { display:flex !important; }
+  .dashboard-menu-btn { display:none !important; }
   .page-header-left h1 { font-size:1.2rem; }
   .chat-container { height:calc(100vh - 200px); }
 }

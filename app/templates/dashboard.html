@@ -6,20 +6,20 @@
 <title>Boubane — Agent IA Local</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/style.css?v=49">
-<link rel="stylesheet" href="/static/css/mail.css?v=49">
+<link rel="stylesheet" href="/static/css/style.css?v=52">
+<link rel="stylesheet" href="/static/css/mail.css?v=52">
 </head>
 <body>
 
 <!-- Mobile overlay -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- Mobile menu button -->
-<button class="mobile-menu-btn" onclick="toggleSidebar()">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
 <div class="app-layout">
+
+  <!-- Mobile menu button (inside app-layout, above sidebar) -->
+  <button class="mobile-menu-btn" onclick="event.stopPropagation();toggleSidebar()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar" id="sidebar">
@@ -995,6 +995,6 @@
 </div>
 
 
-<script src="/static/js/app.js?v=49"></script>
+<script src="/static/js/app.js?v=52"></script>
 </body>
 </html>

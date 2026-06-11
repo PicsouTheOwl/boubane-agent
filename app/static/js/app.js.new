@@ -1029,7 +1029,7 @@
           buf = lines.pop() || '';
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const d = line.substring(6).trim();
+              const d = line[6:].trim();
               if (d === '[DONE]') continue;
               try {
                 const data = JSON.parse(d);
