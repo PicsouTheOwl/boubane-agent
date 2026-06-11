@@ -974,13 +974,35 @@
       </div>
       <div class="dashboard-grid">
         <div class="card">
-          <div class="card-header"><div class="card-title">Agent</div></div>
+          <div class="card-header"><div class="card-title">Agent IA</div></div>
           <div id="agent-status"><p style="color:var(--text-muted);font-size:0.85rem">Chargement…</p></div>
         </div>
         <div class="card">
           <div class="card-header"><div class="card-title">Boîte mail</div></div>
           <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Gérée via Himalaya CLI (IMAP/SMTP).</p>
-          <button class="btn btn-secondary" onclick="switchPage('emails')">Ouvrir la messagerie</button>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="switchPage('emails')">Ouvrir la messagerie</button>
+            <button class="btn btn-ghost btn-sm" onclick="mailRefresh();toast('Synchronisation…','info')">↻ Synchroniser</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Réponses automatiques</div></div>
+          <div id="auto-reply-settings"><p style="color:var(--text-muted);font-size:0.85rem">Chargement…</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Raccourcis clavier</div></div>
+          <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.8">
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">Ctrl+K</kbd> Rechercher emails</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">/</kbd> Focus recherche</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">j/k</kbd> Naviguer emails</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">r</kbd> Répondre</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">e</kbd> Archiver</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">Del</kbd> Supprimer</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">s</kbd> Favori</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">f</kbd> Transférer</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">c</kbd> Nouveau message</div>
+            <div><kbd style="background:var(--bg-surface-3);padding:0.1rem 0.3rem;border-radius:3px;font-size:0.7rem">Ctrl+Enter</kbd> Envoyer</div>
+          </div>
         </div>
       </div>
     </section>

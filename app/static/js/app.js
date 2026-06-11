@@ -1113,8 +1113,39 @@
     try {
       const s = await api('/api/agent/status');
       const el = $('agent-status');
-      if (el) el.innerHTML = `<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><strong>${s.agent} v${s.version}</strong></div><p style="font-size:0.8rem;color:var(--text-muted)">${s.status}</p>`;
+      if (el) el.innerHTML = `<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><strong>${s.agent} v${s.version}</strong></div><p style="font-size:0.8rem;color:var(--text-muted)">${s.status} · ${s.capabilities?.length || 0} capacités</p>`;
     } catch(e) {}
+    // Load auto-reply config
+    try {
+      const cfg = await api('/api/himalaya/auto/config');
+      const el = $('auto-reply-settings');
+      if (!el) return;
+      const statusColor = cfg.enabled ? 'var(--green)' : 'var(--red)';
+      const statusText = cfg.enabled ? 'Activé' : 'Désactivé';
+      el.innerHTML = `
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
+          <div style="width:8px;height:8px;border-radius:50%;background:${statusColor}"></div>
+          <span style="font-size:0.85rem;font-weight:600">${statusText}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem">
+          Tri auto : ${cfg.auto_sort ? '✓' : '✗'} · Réponse auto : ${cfg.auto_reply_draft ? '✓' : '✗'}
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem">
+          ${cfg.sort_rules?.length || 0} règles de tri · Poll : ${cfg.poll_interval_min}min
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="toggleAutoReply()" id="btn-toggle-auto">${cfg.enabled ? 'Désactiver' : 'Activer'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="switchPage('auto-reply')">Configurer</button>
+        </div>`;
+    } catch(e) {}
+  }
+  window.toggleAutoReply = async function() {
+    try {
+      const cfg = await api('/api/himalaya/auto/config');
+      await api('/api/himalaya/auto/config', {method:'POST', body: JSON.stringify({...cfg, enabled: !cfg.enabled})});
+      toast(cfg.enabled ? 'Auto-reply désactivé' : 'Auto-reply activé', 'success');
+      loadAgentStatus();
+    } catch(e) { toast('Erreur: ' + e.message, 'error'); }
   }
 
   /* ═══════════════════════════════════════════
